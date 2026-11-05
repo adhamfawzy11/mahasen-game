@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>محاسن | تحدي التصويب</title>
+<meta name="theme-color" content="#d9eff9">
+<meta name="description" content="تحدي التصويب من محاسن – نسخة تجريبية">
+<style>
+:root{--teal:#08647a;--navy:#06485d;--sky:#d8effb}
+*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;margin:0;background:linear-gradient(165deg,#f2fbff,#cfe9f8);color:#10465a;min-height:100vh}
+.app{width:min(100%,530px);margin:auto;padding:12px 12px 28px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.logo{font-size:29px;font-weight:900;color:#075c71}.sub{font-size:11px;opacity:.72}.demo{font-size:11px;background:#fff;border-radius:25px;padding:8px 10px;border:1px solid #97cede}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.stat{background:#ffffffd9;border:1px solid #a9d6e7;border-radius:15px;text-align:center;padding:9px 3px}.stat strong{display:block;font-size:23px;color:#075d72}.stat small{font-size:11px}
+.arena{height:min(65vh,630px);min-height:390px;position:relative;overflow:hidden;border-radius:25px;border:1px solid #8dbdd4;box-shadow:0 12px 32px #125b7924;background:radial-gradient(circle at 43% 27%,#f5fcff,#d4ebf8 57%,#b1d8eb)}
+.arena:before{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(circle at 15% 22%,white 0 2px,transparent 3px),radial-gradient(circle at 80% 60%,white 0 2px,transparent 3px),radial-gradient(circle at 40% 84%,white 0 2px,transparent 3px);background-size:160px 170px,220px 180px,250px 190px;opacity:.9}
+.arena:after{content:"";pointer-events:none;position:absolute;width:130%;height:34%;border:2px solid #ffffff80;bottom:-25%;left:-15%;border-radius:50%;transform:rotate(-17deg)}
+.playfield{position:absolute;inset:0;touch-action:none;cursor:crosshair;z-index:1}
+.bottle{position:absolute;top:0;left:0;width:70px;height:146px;pointer-events:none;user-select:none;will-change:transform;display:flex;align-items:center;justify-content:center}
+.bottle img{height:100%;width:100%;object-fit:contain;mix-blend-mode:multiply;filter:contrast(1.06);pointer-events:none}
+.bottle:has(img[src=""]){background:#bfcbd2}
+.hud{display:flex;position:absolute;top:10px;left:10px;right:10px;justify-content:space-between;z-index:3;pointer-events:none}
+.pill{font-size:12px;font-weight:bold;background:#e9f9ffec;color:#07576e;padding:9px 12px;border:1px solid #7ac7e0;border-radius:30px}
+.shooter{position:absolute;z-index:2;bottom:0;left:0;right:0;text-align:center;pointer-events:none;padding:18px;background:linear-gradient(transparent,#c6e6f9c9);color:#06627b}
+.cross{display:inline-flex;width:56px;height:56px;border-radius:50%;align-items:center;justify-content:center;font-size:36px;border:2px solid #76bcd6;background:#e6faffb8;box-shadow:0 0 0 7px #ffffff60}
+.pop{position:absolute;z-index:4;color:#046178;font-weight:bold;pointer-events:none;animation:float .5s ease-out forwards;font-size:20px;text-shadow:0 1px #fff}
+@keyframes float{to{transform:translateY(-38px);opacity:0}}
+.layer{position:absolute;z-index:5;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#e1f3f9ee;text-align:center}
+.layer.hidden{display:none}.panel{max-width:355px;width:100%;background:#ffffffee;border:1px solid #b0d5e7;border-radius:23px;padding:25px 18px;box-shadow:0 9px 35px #286b8730}
+.panel h1{margin:0 0 10px;color:#066078;font-size:25px}.panel p{line-height:1.8;font-size:14px}.primary{cursor:pointer;background:#076b83;color:white;border:none;border-radius:14px;padding:14px 20px;font-size:16px;font-weight:700;width:100%;margin-top:12px}.primary:active{transform:scale(.98)}
+.secondary{background:white;border:1px solid #a2cadc;color:#08637b;border-radius:12px;padding:11px 15px;cursor:pointer;font-weight:bold}.field{width:100%;border:1px solid #9ec6d8;border-radius:12px;padding:12px;font-size:16px;margin:7px 0;background:#fff;direction:rtl}
+.note{font-size:12px;color:#517c8a;line-height:1.7}.below{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}.below span{font-size:11px;color:#577f8d}
+#reward{font-size:27px;color:#086c84;font-weight:900}.hidden{display:none!important}
+@media(max-height:690px){.arena{height:60vh;min-height:330px}.app{padding-top:6px}.stats{margin:5px 0}.stat{padding:6px 3px}}
+</style>
+</head>
+<body><main class="app">
+<header class="top"><div><div class="logo">✦ محاسن</div><div class="sub">Mahasin Bottle Blaster</div></div><span class="demo">نسخة تجريبية V4</span></header>
+<section class="stats"><div class="stat"><strong id="score">0</strong><small>النقاط</small></div><div class="stat"><strong id="level">1</strong><small>المستوى</small></div><div class="stat"><strong id="time">60</strong><small>ثانية</small></div></section>
+<section class="arena" id="arena">
+<div class="playfield" id="field"></div><div class="hud"><div class="pill" id="hits">إصابات: 0 / 0</div><div class="pill" id="gravity">الجاذبية 1.0×</div></div>
+<div class="shooter"><div class="cross">⌖</div></div>
+<div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن وهي نازلة! كل إصابة تكسبك نقاط، وكل 12 ثانية اللعبة هتبقى أسرع وأصعب.</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><button class="primary" id="start">ابدأ التحدي</button><p class="note">الجوائز وبيانات العملاء في النسخة دي توضيحية فقط.</p></div></div>
+<div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward"></div><p id="accuracy"></p><div id="claimForm"><p>سيب بيانات تجريبية لمعاينة خطوة استلام الجائزة (لن تُرسل أو تُخزن).</p><input class="field" id="customerName" autocomplete="off" placeholder="الاسم (للتجربة)"><input class="field" id="phone" inputmode="tel" autocomplete="off" placeholder="رقم الجوال (للتجربة)"><label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label><button class="primary" id="claim">معاينة استلام الجائزة</button></div><p class="note hidden" id="confirmation">✅ تم استعراض خطوة التسجيل. لم يتم حفظ أي بيانات أو إصدار كوبون حقيقي.</p><button class="secondary" id="again">العب مرة تانية</button></div></div>
+</section>
+<div class="below"><span>اسحب أو اضغط مباشرة على الزجاجة للتصويب</span><button class="secondary" id="reset">إعادة اللعب ↻</button></div>
+<p class="note">نسخة عامة للاختبار فقط · غير متصلة بـ Google Sheets أو GTM أو كوبونات المتجر.</p></main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const field=$('field'), arena=$('arena');
+const imgUrl='https://img.ananinja.com/media/bra-public-files/services-admin/files/e293c7a5-3ef1-42c4-be96-883c2d978dcd?q=90&w=3840';
+let running=false,started=0,last=0,spawn=0,score=0,hits=0,shots=0,level=1,objects=[],frameId=0,round=0;
+const rewards=[{min:500,label:'الجائزة الكبرى (تجريبية)'},{min:380,label:'خصم 20% (تجريبي)'},{min:260,label:'خصم 15% (تجريبي)'},{min:160,label:'خصم 10% (تجريبي)'},{min:80,label:'خصم 5% (تجريبي)'},{min:0,label:'حاول مرة تانية!'}];
+function dims(){return {w:field.clientWidth,h:field.clientHeight}}
+function update(t){$('score').textContent=score;$('level').textContent=level;$('time').textContent=Math.max(0,Math.ceil(60-t));$('hits').textContent='إصابات: '+hits+' / '+shots;$('gravity').textContent='الجاذبية '+(1+(level-1)*.25).toFixed(2)+'×'}
+function remove(o){o.el.remove();objects=objects.filter(x=>x!==o)}
+function add(){const {w}=dims();const width=Math.max(49,70-(level-1)*4),height=width*2.08;const x=8+Math.random()*Math.max(1,w-width-16);const el=document.createElement('div');el.className='bottle';el.style.width=width+'px';el.style.height=height+'px';const im=document.createElement('img');im.src=imgUrl;im.alt='زجاجة محاسن';im.draggable=false;el.append(im);field.append(el);const o={el,x,y:-height,width,height,speed:110+level*33+Math.random()*35,wave:Math.random()*Math.PI*2,phase:Math.random()*6};objects.push(o)}
+function draw(o){o.el.style.transform='translate3d('+o.x+'px,'+o.y+'px,0) rotate('+(Math.sin(o.phase)*9)+'deg)'}
+function loop(now){if(!running)return;const dt=Math.min((now-last)/1000,.045);last=now;const t=(now-started)/1000;level=Math.min(5,1+Math.floor(t/12));update(t);if(t>=60){finish();return}
+spawn+=dt;const period=Math.max(.44,1.17-(level-1)*.16);
+while(spawn>=period){spawn-=period;add()}
+const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt*(1+(level-1)*.12);o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*(level>2?34:9)));draw(o);if(o.y>h+8)remove(o)}
+frameId=requestAnimationFrame(loop)}
+function start(){cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);frameId=requestAnimationFrame(loop)}
+function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
+field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*.54&&Math.abs(y-cy)<o.height*.49){hit=o;break}}if(hit){hits++;const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
+function finish(){running=false;cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];$('finalScore').textContent=score;const accuracy=shots?Math.round(100*hits/shots):0;$('accuracy').textContent='دقة التصويب: '+accuracy+'%';const eligible=accuracy>=45?score:Math.min(score,159);$('reward').textContent=rewards.find(r=>eligible>=r.min).label;$('result').classList.remove('hidden');}
+$('start').onclick=start;$('again').onclick=start;$('reset').onclick=start;
+$('claim').onclick=()=>{$('claimForm').classList.add('hidden');$('confirmation').classList.remove('hidden')};
+})();
+</script></body></html>
