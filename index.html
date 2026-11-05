@@ -9,7 +9,7 @@
 :root{--teal:#08647a;--navy:#06485d;--sky:#d8effb}
 *{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;margin:0;background:linear-gradient(165deg,#f2fbff,#cfe9f8);color:#10465a;min-height:100vh}
 .app{width:min(100%,530px);margin:auto;padding:12px 12px 28px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.logo{font-size:29px;font-weight:900;color:#075c71}.sub{font-size:11px;opacity:.72}.demo{font-size:11px;background:#fff;border-radius:25px;padding:8px 10px;border:1px solid #97cede}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.stat{background:#ffffffd9;border:1px solid #a9d6e7;border-radius:15px;text-align:center;padding:9px 3px}.stat strong{display:block;font-size:23px;color:#075d72}.stat small{font-size:11px}
+.top-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sound-toggle{border:1px solid #85c7de;border-radius:22px;background:#e9faff;color:#07566c;padding:9px 10px;font-size:12px;font-weight:bold;cursor:pointer}.sound-toggle:focus-visible{outline:3px solid #065e77;outline-offset:2px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.stat{background:#ffffffd9;border:1px solid #a9d6e7;border-radius:15px;text-align:center;padding:9px 3px}.stat strong{display:block;font-size:23px;color:#075d72}.stat small{font-size:11px}
 .arena{height:min(65vh,630px);min-height:390px;position:relative;overflow:hidden;border-radius:25px;border:1px solid #8dbdd4;box-shadow:0 12px 32px #125b7924;background:radial-gradient(circle at 43% 27%,#f5fcff,#d4ebf8 57%,#b1d8eb)}
 .arena:before{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(circle at 15% 22%,white 0 2px,transparent 3px),radial-gradient(circle at 80% 60%,white 0 2px,transparent 3px),radial-gradient(circle at 40% 84%,white 0 2px,transparent 3px);background-size:160px 170px,220px 180px,250px 190px;opacity:.9}
 .arena:after{content:"";pointer-events:none;position:absolute;width:130%;height:34%;border:2px solid #ffffff80;bottom:-25%;left:-15%;border-radius:50%;transform:rotate(-17deg)}
@@ -33,7 +33,7 @@
 </style>
 </head>
 <body><main class="app">
-<header class="top"><div><div class="logo">✦ محاسن</div><div class="sub">Mahasin Bottle Blaster</div></div><span class="demo">نسخة تجريبية V4</span></header>
+<header class="top"><div><div class="logo">✦ محاسن</div><div class="sub">Mahasin Bottle Blaster</div></div><div class="top-actions"><button id="soundToggle" class="sound-toggle" type="button" aria-label="كتم الصوت" aria-pressed="true">🔊 الصوت شغال</button><span class="demo">نسخة تجريبية V4</span></div></header>
 <section class="stats"><div class="stat"><strong id="score">0</strong><small>النقاط</small></div><div class="stat"><strong id="level">1</strong><small>المستوى</small></div><div class="stat"><strong id="time">60</strong><small>ثانية</small></div></section>
 <section class="arena" id="arena">
 <div class="playfield" id="field"></div><div class="hud"><div class="pill" id="hits">إصابات: 0 / 0</div><div class="pill" id="gravity">الجاذبية 1.0×</div></div>
@@ -47,6 +47,62 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const field=$('field'), arena=$('arena');
+let soundEnabled=true, audioCtx=null, noiseBuffer=null;
+function ensureAudio(){
+  if(!soundEnabled)return null;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return null;
+    if(!audioCtx)audioCtx=new AC();
+    if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+    return audioCtx;
+  }catch(e){return null}
+}
+function shotSound(){
+  const ctx=ensureAudio();if(!ctx)return;
+  try{
+    const t=ctx.currentTime;
+    if(!noiseBuffer){
+      const len=Math.round(ctx.sampleRate*.11);
+      noiseBuffer=ctx.createBuffer(1,len,ctx.sampleRate);
+      const d=noiseBuffer.getChannelData(0);
+      for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.6);
+    }
+    const src=ctx.createBufferSource();src.buffer=noiseBuffer;
+    const filter=ctx.createBiquadFilter();filter.type='highpass';filter.frequency.value=370;
+    const gain=ctx.createGain();gain.gain.setValueAtTime(.16,t);
+    gain.gain.exponentialRampToValueAtTime(.001,t+.1);
+    src.connect(filter).connect(gain).connect(ctx.destination);
+    src.start(t);src.stop(t+.105);
+    const osc=ctx.createOscillator();const g2=ctx.createGain();
+    osc.type='triangle';osc.frequency.setValueAtTime(170,t);
+    osc.frequency.exponentialRampToValueAtTime(65,t+.075);
+    g2.gain.setValueAtTime(.12,t);g2.gain.exponentialRampToValueAtTime(.001,t+.085);
+    osc.connect(g2).connect(ctx.destination);osc.start(t);osc.stop(t+.09);
+  }catch(e){}
+}
+function hitSound(){
+  const ctx=ensureAudio();if(!ctx)return;
+  try{
+    const t=ctx.currentTime;
+    [620,930].forEach((hz,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain(),start=t+i*.055;
+      o.type='sine';o.frequency.setValueAtTime(hz,start);
+      g.gain.setValueAtTime(.001,start);
+      g.gain.linearRampToValueAtTime(.085,start+.012);
+      g.gain.exponentialRampToValueAtTime(.001,start+.16);
+      o.connect(g).connect(ctx.destination);o.start(start);o.stop(start+.17);
+    });
+  }catch(e){}
+}
+$('soundToggle').addEventListener('click',()=>{
+  soundEnabled=!soundEnabled;
+  $('soundToggle').textContent=soundEnabled?'🔊 الصوت شغال':'🔇 الصوت مكتوم';
+  $('soundToggle').setAttribute('aria-pressed',String(soundEnabled));
+  $('soundToggle').setAttribute('aria-label',soundEnabled?'كتم الصوت':'تشغيل الصوت');
+  if(soundEnabled)ensureAudio();
+});
+
 const imgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 230\"><defs><linearGradient id=\"m\" x1=\"0\" x2=\"1\"><stop stop-color=\"#8e959b\"/><stop offset=\".16\" stop-color=\"#e9eff1\"/><stop offset=\".48\" stop-color=\"#b9c1c6\"/><stop offset=\".68\" stop-color=\"#f6f8fa\"/><stop offset=\"1\" stop-color=\"#929ca2\"/></linearGradient><linearGradient id=\"w\"><stop stop-color=\"#e3e5e7\"/><stop offset=\".45\" stop-color=\"#fff\"/><stop offset=\"1\" stop-color=\"#c5cbd1\"/></linearGradient></defs><rect x=\"38\" y=\"4\" width=\"25\" height=\"35\" rx=\"6\" fill=\"url(#w)\" stroke=\"#cfd7dc\"/><rect x=\"29\" y=\"32\" width=\"43\" height=\"27\" rx=\"4\" fill=\"#f8fbff\" stroke=\"#cbd1d5\"/><g stroke=\"#cbd3d8\" stroke-width=\".8\"><path d=\"M33 34v23\"/><path d=\"M37 34v23\"/><path d=\"M41 34v23\"/><path d=\"M45 34v23\"/><path d=\"M49 34v23\"/><path d=\"M53 34v23\"/><path d=\"M57 34v23\"/><path d=\"M61 34v23\"/><path d=\"M65 34v23\"/></g><path d=\"M28 57q-3 17-14 27Q9 92 9 110v98q0 14 14 14h54q14 0 14-14v-98q0-18-5-26Q75 74 72 57z\" fill=\"url(#m)\" stroke=\"#a4adb2\" stroke-width=\"1.5\"/><path d=\"M23 88q-7 52-3 112\" fill=\"none\" stroke=\"#fff\" opacity=\".45\" stroke-width=\"4\"/><text x=\"50\" y=\"127\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Tahoma,Arial\" font-size=\"19\" font-weight=\"bold\">محاسن</text><text x=\"50\" y=\"141\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Arial\" font-size=\"8\">Mahasin</text><text x=\"50\" y=\"186\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Tahoma,Arial\" font-size=\"9\" font-weight=\"bold\">زيت محاسن للشعر</text><text x=\"50\" y=\"198\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Tahoma,Arial\" font-size=\"6\">مستخلصات طبيعية ١٠٠٪</text></svg>");
 let running=false,started=0,last=0,spawn=0,score=0,hits=0,shots=0,level=1,objects=[],frameId=0,round=0;
 const rewards=[{min:500,label:'الجائزة الكبرى (تجريبية)'},{min:380,label:'خصم 20% (تجريبي)'},{min:260,label:'خصم 15% (تجريبي)'},{min:160,label:'خصم 10% (تجريبي)'},{min:80,label:'خصم 5% (تجريبي)'},{min:0,label:'حاول مرة تانية!'}];
@@ -60,9 +116,9 @@ spawn+=dt;const period=Math.max(.44,1.17-(level-1)*.16);
 while(spawn>=period){spawn-=period;add()}
 const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt*(1+(level-1)*.12);o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*(level>2?34:9)));draw(o);if(o.y>h+8)remove(o)}
 frameId=requestAnimationFrame(loop)}
-function start(){cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);frameId=requestAnimationFrame(loop)}
+function start(){ensureAudio();cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);frameId=requestAnimationFrame(loop)}
 function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
-field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*.54&&Math.abs(y-cy)<o.height*.49){hit=o;break}}if(hit){hits++;const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
+field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*.54&&Math.abs(y-cy)<o.height*.49){hit=o;break}}if(hit){hitSound();hits++;const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
 function finish(){running=false;cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];$('finalScore').textContent=score;const accuracy=shots?Math.round(100*hits/shots):0;$('accuracy').textContent='دقة التصويب: '+accuracy+'%';const eligible=accuracy>=45?score:Math.min(score,159);$('reward').textContent=rewards.find(r=>eligible>=r.min).label;$('result').classList.remove('hidden');}
 $('start').onclick=start;$('again').onclick=start;$('reset').onclick=start;
 $('claim').onclick=()=>{$('claimForm').classList.add('hidden');$('confirmation').classList.remove('hidden')};
