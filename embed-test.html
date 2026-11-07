@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>اختبار ويدجت محاسن</title>
+<style>body{font-family:Tahoma,Arial,sans-serif;background:#eaf6fc;color:#075b70;text-align:center;padding:40px 14px}button{background:#08647a;color:white;border:0;border-radius:16px;padding:15px 25px;font-size:17px;cursor:pointer}.note{font-size:13px;color:#567b89;margin-top:18px}</style></head><body><h1>اختبار نافذة لعبة محاسن</h1><p>صفحة اختبار تقنية للـ Widget قبل وضعها على المتجر.</p><button id="openGame">🎯 افتح اللعبة</button><p class="note" id="events">الأحداث التي تصل من اللعبة ستظهر هنا.</p>
+<script>
+(function(){
+var origin='https://adhamfawzy11.github.io',url=origin+'/mahasen-game/?embed=1&v=7',frame=null,overlay=null;
+function close(){if(overlay&&overlay.parentNode)overlay.parentNode.removeChild(overlay);overlay=null;frame=null;document.body.style.overflow='';}
+document.getElementById('openGame').onclick=function(){if(overlay)return;overlay=document.createElement('div');overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,22,34,.7);display:flex;align-items:center;justify-content:center;padding:12px';
+var shell=document.createElement('div');shell.style.cssText='position:relative;width:min(100%,540px);height:min(93dvh,900px);height:min(93vh,900px);background:white;border-radius:20px;overflow:hidden';
+var closeBtn=document.createElement('button');closeBtn.textContent='×';closeBtn.setAttribute('aria-label','إغلاق اللعبة');closeBtn.style.cssText='position:absolute;z-index:4;top:10px;left:10px;border-radius:50%;width:40px;height:40px;padding:0;font-size:26px';
+closeBtn.onclick=close;
+frame=document.createElement('iframe');frame.src=url;frame.title='لعبة محاسن';frame.allow='autoplay';frame.style.cssText='width:100%;height:100%;border:0;background:#d8eefb';
+shell.appendChild(frame);shell.appendChild(closeBtn);overlay.appendChild(shell);document.body.appendChild(overlay);document.body.style.overflow='hidden';};
+window.addEventListener('message',function(event){if(event.origin!==origin||!frame||event.source!==frame.contentWindow)return;var d=event.data;if(!d||d.type!=='mahasen_game_event'||!d.payload)return;document.getElementById('events').textContent='آخر Event: '+String(d.payload.event||'unknown');});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script></body></html>
