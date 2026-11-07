@@ -15,7 +15,7 @@
 .arena:after{content:"";pointer-events:none;position:absolute;width:130%;height:34%;border:2px solid #ffffff80;bottom:-25%;left:-15%;border-radius:50%;transform:rotate(-17deg)}
 .playfield{position:absolute;inset:0;touch-action:none;cursor:crosshair;z-index:1}
 .bottle{position:absolute;top:0;left:0;width:70px;height:146px;pointer-events:none;user-select:none;will-change:transform;display:flex;align-items:center;justify-content:center}
-.bottle img{height:100%;width:100%;object-fit:contain;mix-blend-mode:multiply;filter:contrast(1.06);pointer-events:none}
+.bottle img{height:100%;width:100%;object-fit:contain;filter:none;pointer-events:none}
 .bottle:has(img[src=""]){background:#bfcbd2}
 .hud{display:flex;position:absolute;top:10px;left:10px;right:10px;justify-content:space-between;z-index:3;pointer-events:none}
 .pill{font-size:12px;font-weight:bold;background:#e9f9ffec;color:#07576e;padding:9px 12px;border:1px solid #7ac7e0;border-radius:30px}
@@ -105,7 +105,7 @@ $('soundToggle').addEventListener('click',()=>{
 $('soundTest').addEventListener('click',()=>{if(!soundEnabled){soundEnabled=true;$('soundToggle').textContent='🔊 الصوت شغال';$('soundToggle').setAttribute('aria-pressed','true')}const ctx=ensureAudio();if(!ctx){$('soundStatus').textContent='الصوت غير مدعوم أو محجوب في المتصفح الحالي.';return}shotSound();setTimeout(hitSound,170);$('soundStatus').textContent=ctx.state==='running'?'🔊 تم تشغيل صوت تجريبي. لو مش مسموع، ارفع صوت الميديا بالجهاز.':'جاري تفعيل الصوت...';});
 
 // Use the real Mahasin product photo rather than the temporary SVG drawing.
-const imgUrl='https://media.zid.store/69700348-64c8-4da8-a2cb-3b3b12a78746/c2a23f67-90fa-4952-8061-d20ac39a4396.png';
+const imgUrl='assets/mahasen-bottle.webp';
 function track(name,extra={}){
  const payload={event:'mahasen_'+name,game_version:'v5',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
