@@ -27,22 +27,31 @@
 .layer.hidden{display:none}.panel{max-width:355px;width:100%;background:#ffffffee;border:1px solid #b0d5e7;border-radius:23px;padding:25px 18px;box-shadow:0 9px 35px #286b8730}
 .panel h1{margin:0 0 10px;color:#066078;font-size:25px}.panel p{line-height:1.8;font-size:14px}.primary{cursor:pointer;background:#076b83;color:white;border:none;border-radius:14px;padding:14px 20px;font-size:16px;font-weight:700;width:100%;margin-top:12px}.primary:active{transform:scale(.98)}
 .secondary{background:white;border:1px solid #a2cadc;color:#08637b;border-radius:12px;padding:11px 15px;cursor:pointer;font-weight:bold}.field{width:100%;border:1px solid #9ec6d8;border-radius:12px;padding:12px;font-size:16px;margin:7px 0;background:#fff;direction:rtl}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.terms-consent{display:flex;align-items:flex-start;gap:8px;text-align:right;font-size:12px;line-height:1.8;margin:12px 0 0;color:#17536a}
+.terms-consent input{margin-top:6px;width:18px;height:18px;flex-shrink:0;accent-color:#08728a}
+.text-link{font:inherit;color:#075f7a;text-decoration:underline;border:0;background:none;padding:0;cursor:pointer}
+.form-error{color:#b42318;font-size:12px;line-height:1.7;margin:7px 0}
+.terms-modal{position:fixed;inset:0;background:#002b3c99;z-index:1000;display:flex;justify-content:center;align-items:center;padding:18px}
+.terms-panel{width:min(100%,500px);max-height:85vh;overflow:auto;background:#fff;border-radius:20px;padding:24px;box-shadow:0 10px 40px #00283c55}
+.terms-panel h2{font-size:23px;margin:0 0 12px;color:#075b70}.terms-body{font-size:14px;line-height:1.85;text-align:right}
 .note{font-size:12px;color:#517c8a;line-height:1.7}.below{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}.below span{font-size:11px;color:#577f8d}
 #reward{font-size:27px;color:#086c84;font-weight:900}.hidden{display:none!important}
 @media(max-height:690px){.arena{height:60vh;min-height:330px}.app{padding-top:6px}.stats{margin:5px 0}.stat{padding:6px 3px}}
 </style>
 </head>
 <body><main class="app">
-<header class="top"><div><div class="logo">✦ محاسن</div><div class="sub">Mahasin Bottle Blaster</div></div><div class="top-actions"><button id="soundTest" class="sound-toggle" type="button">▶ اختبار الصوت</button><button id="soundToggle" class="sound-toggle" type="button" aria-label="كتم الصوت" aria-pressed="true">🔊 الصوت شغال</button><span class="demo">نسخة تجريبية V4</span></div></header>
+<header class="top"><div><div class="logo">✦ محاسن</div><div class="sub">Mahasin Bottle Blaster</div></div><div class="top-actions"><button id="soundToggle" class="sound-toggle" type="button" aria-label="كتم الصوت" aria-pressed="true">🔊 الصوت شغال</button></div></header>
 <section class="stats"><div class="stat"><strong id="score">0</strong><small>النقاط</small></div><div class="stat"><strong id="level">1</strong><small>المستوى</small></div><div class="stat"><strong id="time">60</strong><small>ثانية</small></div></section>
 <section class="arena" id="arena">
 <div class="playfield" id="field"></div><div class="hud"><div class="pill" id="hits">إصابات: 0 / 0</div><div class="pill" id="gravity">الجاذبية 1.0×</div></div>
 <div class="shooter"><div class="cross">⌖</div></div>
-<div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن وهي نازلة! كل إصابة تكسبك نقاط، وكل 12 ثانية اللعبة هتبقى أسرع وأصعب.</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><button class="primary" id="start">ابدأ التحدي</button><p class="note">الجوائز وبيانات العملاء في النسخة دي توضيحية فقط.</p></div></div>
-<div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward"></div><p id="accuracy"></p><div id="claimForm"><p>سيب بيانات تجريبية لمعاينة خطوة استلام الجائزة (لن تُرسل أو تُخزن).</p><input class="field" id="customerName" autocomplete="off" placeholder="الاسم (للتجربة)"><input class="field" id="phone" inputmode="tel" autocomplete="off" placeholder="رقم الجوال (للتجربة)"><label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label><button class="primary" id="claim">معاينة استلام الجائزة</button></div><p class="note hidden" id="confirmation">✅ تم استعراض خطوة التسجيل. لم يتم حفظ أي بيانات أو إصدار كوبون حقيقي.</p><button class="secondary" id="again">العب مرة تانية</button></div></div>
+<div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن! تبدأ اللعبة سهلة، ثم تزيد سرعة وحركة الأهداف تدريجيًا حتى التحدي الأصعب.</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class="terms-consent"><input type="checkbox" id="agreeTerms"> <span>أوافق على <button type="button" id="showTerms" class="text-link">شروط وأحكام المشاركة</button> و<a href="https://mahasen.com/ar-sa/" target="_blank" rel="noopener" class="text-link">سياسة خصوصية المتجر</a>.</span></label><p id="termsError" class="form-error hidden" role="alert">يرجى الموافقة على الشروط قبل اللعب.</p><button class="primary" id="start">ابدأ التحدي</button></div></div>
+<div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward"></div><p id="accuracy"></p><div id="claimForm"><p>سجّل بياناتك لاستكمال طلب الجائزة.</p><p class="note">هذه نسخة تجربة: لا تُحفظ البيانات ولا يُصدر كوبون فعلي حتى إطلاق الحملة.</p><input class="field" id="customerName" autocomplete="off" placeholder="الاسم"><input class="field" id="phone" inputmode="tel" autocomplete="off" placeholder="رقم الجوال"><label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label><button class="primary" id="claim">معاينة استلام الجائزة</button></div><p class="note hidden" id="confirmation">✅ اكتملت معاينة استلام الجائزة. لا يتم حفظ بياناتك أو إصدار كوبون في هذه النسخة.</p><button class="secondary" id="again">العب مرة تانية</button></div></div>
 </section>
-<div class="below"><span>اسحب أو اضغط مباشرة على الزجاجة للتصويب</span><button class="secondary" id="reset">إعادة اللعب ↻</button></div>
-<p class="note" id="soundStatus" role="status">للتأكد من الصوت اضغط «اختبار الصوت» وارفع مستوى صوت الجهاز.</p><p class="note">نسخة عامة للاختبار فقط · غير متصلة بـ Google Sheets أو كوبونات المتجر. أحداث اللعب مهيأة للربط مع GTM.</p></main>
+<div class="terms-modal hidden" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle"><div class="terms-panel"><h2 id="termsTitle">شروط تحدي محاسن</h2><div class="terms-body"><p>هذه لعبة ترويجية تعتمد على مهارة التصويب. مدة الجولة 60 ثانية، وتتدرج الصعوبة خلال خمسة مستويات. تُحدد فئة الجائزة حسب النقاط ودقة التصويب.</p><p>المشاركة اختيارية. لا يتطلب اللعب شراء منتج. يجب الالتزام بقواعد اللعبة، ويُحظر التلاعب بالنتائج أو استخدام أدوات آلية.</p><p>الجوائز الظاهرة في هذه النسخة توضيحية وغير قابلة للاسترداد. ستُنشر شروط الجوائز الفعلية، وحدود المحاولات، والأهلية، وصلاحية الأكواد قبل إطلاق الحملة.</p><p>عند تفعيل الجوائز قد يُطلب رقم الجوال للتحقق والتسليم وفق سياسة الخصوصية المعتمدة. الموافقة على الرسائل التسويقية اختيارية ومنفصلة.</p><p><strong>هذه صياغة أولية يجب اعتمادها قانونيًا وتوفير رابط سياسة الخصوصية النهائي قبل الإطلاق الحقيقي.</strong></p></div><button class="primary" id="closeTerms" type="button">فهمت الشروط</button></div></div>
+<div class="below"><span>🎯 اضغط على الزجاجات لتصيبها</span><button class="secondary" id="reset">إعادة اللعب ↻</button></div>
+<span id="soundStatus" class="sr-only" role="status" aria-live="polite"></span></main>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
@@ -102,33 +111,39 @@ $('soundToggle').addEventListener('click',()=>{
   $('soundToggle').setAttribute('aria-label',soundEnabled?'كتم الصوت':'تشغيل الصوت');
   if(soundEnabled)ensureAudio();
 });
-$('soundTest').addEventListener('click',()=>{if(!soundEnabled){soundEnabled=true;$('soundToggle').textContent='🔊 الصوت شغال';$('soundToggle').setAttribute('aria-pressed','true')}const ctx=ensureAudio();if(!ctx){$('soundStatus').textContent='الصوت غير مدعوم أو محجوب في المتصفح الحالي.';return}shotSound();setTimeout(hitSound,170);$('soundStatus').textContent=ctx.state==='running'?'🔊 تم تشغيل صوت تجريبي. لو مش مسموع، ارفع صوت الميديا بالجهاز.':'جاري تفعيل الصوت...';});
+
 
 // Use the real Mahasin product photo rather than the temporary SVG drawing.
 const imgUrl='assets/mahasen-bottle.webp';
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v5',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v6',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
 
 let running=false,started=0,last=0,spawn=0,score=0,hits=0,shots=0,level=1,objects=[],frameId=0,round=0;
+const difficulty=[{name:'سهل',speed:155,spawn:1.2,size:78,sway:8,hitbox:.52},{name:'متوسط',speed:260,spawn:.94,size:68,sway:24,hitbox:.48},{name:'صعب',speed:390,spawn:.72,size:59,sway:52,hitbox:.44},{name:'محترف',speed:540,spawn:.54,size:52,sway:84,hitbox:.40},{name:'أسطوري',speed:720,spawn:.42,size:46,sway:120,hitbox:.37}];
 const rewards=[{min:500,label:'الجائزة الكبرى (تجريبية)'},{min:380,label:'خصم 20% (تجريبي)'},{min:260,label:'خصم 15% (تجريبي)'},{min:160,label:'خصم 10% (تجريبي)'},{min:80,label:'خصم 5% (تجريبي)'},{min:0,label:'حاول مرة تانية!'}];
 function dims(){return {w:field.clientWidth,h:field.clientHeight}}
 function update(t){$('score').textContent=score;$('level').textContent=level;$('time').textContent=Math.max(0,Math.ceil(60-t));$('hits').textContent='إصابات: '+hits+' / '+shots;$('gravity').textContent='الجاذبية '+(1+(level-1)*.25).toFixed(2)+'×'}
 function remove(o){o.el.remove();objects=objects.filter(x=>x!==o)}
-function add(){const {w}=dims();const width=Math.max(49,70-(level-1)*4),height=width*2.08;const x=8+Math.random()*Math.max(1,w-width-16);const el=document.createElement('div');el.className='bottle';el.style.width=width+'px';el.style.height=height+'px';const im=document.createElement('img');im.src=imgUrl;im.alt='زجاجة محاسن';im.draggable=false;im.onerror=()=>{im.alt='تعذر تحميل صورة المنتج';};el.append(im);field.append(el);const o={el,x,y:-height,width,height,speed:110+level*33+Math.random()*35,wave:Math.random()*Math.PI*2,phase:Math.random()*6};objects.push(o)}
+function add(){const {w}=dims();const settings=difficulty[level-1];const width=settings.size,height=width*2.08;const x=8+Math.random()*Math.max(1,w-width-16);const el=document.createElement('div');el.className='bottle';el.style.width=width+'px';el.style.height=height+'px';const im=document.createElement('img');im.src=imgUrl;im.alt='زجاجة محاسن';im.draggable=false;im.onerror=()=>{im.alt='تعذر تحميل صورة المنتج';};el.append(im);field.append(el);const o={el,x,y:-height,width,height,speed:settings.speed+(Math.random()-.5)*settings.speed*.14,wave:Math.random()*Math.PI*2,phase:Math.random()*6};objects.push(o)}
 function draw(o){o.el.style.transform='translate3d('+o.x+'px,'+o.y+'px,0) rotate('+(Math.sin(o.phase)*9)+'deg)'}
 function loop(now){if(!running)return;const dt=Math.min((now-last)/1000,.045);last=now;const t=(now-started)/1000;level=Math.min(5,1+Math.floor(t/12));update(t);if(t>=60){finish();return}
-spawn+=dt;const period=Math.max(.44,1.17-(level-1)*.16);
+spawn+=dt;const period=difficulty[level-1].spawn;
 while(spawn>=period){spawn-=period;add()}
-const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt*(1+(level-1)*.12);o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*(level>2?34:9)));draw(o);if(o.y>h+8)remove(o)}
+const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt;o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*difficulty[level-1].sway));draw(o);if(o.y>h+8)remove(o)}
 frameId=requestAnimationFrame(loop)}
-function start(){ensureAudio();track('start');cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);frameId=requestAnimationFrame(loop)}
+function start(){if(!$('agreeTerms').checked){$('termsError').classList.remove('hidden');$('agreeTerms').focus();return} $('termsError').classList.add('hidden');ensureAudio();track('start',{terms_accepted:true,terms_version:'draft-2026-11-07'});cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);frameId=requestAnimationFrame(loop)}
 function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
-field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();track('shot',{level});let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*.54&&Math.abs(y-cy)<o.height*.49){hit=o;break}}if(hit){hitSound();hits++;track('hit',{level});const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
+field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();track('shot',{level});let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*difficulty[level-1].hitbox&&Math.abs(y-cy)<o.height*difficulty[level-1].hitbox){hit=o;break}}if(hit){hitSound();hits++;track('hit',{level});const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
 function finish(){running=false;cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];$('finalScore').textContent=score;const accuracy=shots?Math.round(100*hits/shots):0;$('accuracy').textContent='دقة التصويب: '+accuracy+'%';const eligible=accuracy>=45?score:Math.min(score,159);$('reward').textContent=rewards.find(r=>eligible>=r.min).label;$('result').classList.remove('hidden');track('complete',{score,level,accuracy,reward_tier:rewards.find(r=>eligible>=r.min).label});}
 $('start').onclick=start;$('again').onclick=start;$('reset').onclick=start;
+$('showTerms').onclick=()=>{$('termsModal').classList.remove('hidden');$('closeTerms').focus()};
+$('closeTerms').onclick=()=>{$('termsModal').classList.add('hidden');$('showTerms').focus()};
+$('agreeTerms').onchange=()=>{if($('agreeTerms').checked)$('termsError').classList.add('hidden')};
+$('termsModal').addEventListener('click',e=>{if(e.target===$('termsModal'))$('closeTerms').click()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('termsModal').classList.contains('hidden'))$('closeTerms').click()});
 $('claim').onclick=()=>{$('claimForm').classList.add('hidden');$('confirmation').classList.remove('hidden')};
 })();
 </script></body></html>
