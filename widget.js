@@ -1,147 +1,156 @@
-/* Mahasen game widget v9 — minimal GTM loader */
-(function () {
-  'use strict';
-  if (window.__mahasenWidgetV9) return;
-  window.__mahasenWidgetV9 = true;
+/* Mahasen Game v10 - iframe-free Shadow DOM widget. Engine is hosted here, not in GTM. */
+(function(){
+'use strict';
+if(window.__mahasenShadowWidgetV10)return;
+window.__mahasenShadowWidgetV10=true;
+var host=null,lifecycle=null,oldOverflow='',oldFocus=null;
+function push(event){window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:event,game_version:'v10'});}
+function close(){
+ if(!host)return;
+ if(lifecycle&&typeof lifecycle.dispose==='function')lifecycle.dispose();
+ host.remove();host=null;lifecycle=null;
+ document.body.style.overflow=oldOverflow;
+ if(oldFocus&&oldFocus.focus)oldFocus.focus();
+ push('mahasen_widget_close');
+}
+function open(){
+ if(host||!document.body)return;
+ oldFocus=document.activeElement;
+ oldOverflow=document.body.style.overflow;
+ host=document.createElement('div');
+ host.id='mahasen-widget-host-v10';
+ host.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,21,31,.82);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px 7px;box-sizing:border-box';
+ var root=host.attachShadow({mode:'open'});
+ root.innerHTML="<style>\n:root{--teal:#08647a;--navy:#06485d;--sky:#d8effb}\n*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;margin:0;background:linear-gradient(165deg,#f2fbff,#cfe9f8);color:#10465a;min-height:100vh}\n.app{width:min(100%,530px);margin:auto;padding:12px 12px 28px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.logo{font-size:29px;font-weight:900;color:#075c71}.sub{font-size:11px;opacity:.72}.demo{font-size:11px;background:#fff;border-radius:25px;padding:8px 10px;border:1px solid #97cede}\n.top-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sound-toggle{border:1px solid #85c7de;border-radius:22px;background:#e9faff;color:#07566c;padding:9px 10px;font-size:12px;font-weight:bold;cursor:pointer}.sound-toggle:focus-visible{outline:3px solid #065e77;outline-offset:2px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.stat{background:#ffffffd9;border:1px solid #a9d6e7;border-radius:15px;text-align:center;padding:9px 3px}.stat strong{display:block;font-size:23px;color:#075d72}.stat small{font-size:11px}\n.arena{height:min(65vh,630px);min-height:390px;position:relative;overflow:hidden;border-radius:25px;border:1px solid #8dbdd4;box-shadow:0 12px 32px #125b7924;background:radial-gradient(circle at 43% 27%,#f5fcff,#d4ebf8 57%,#b1d8eb)}\n.arena:before{content:\"\";pointer-events:none;position:absolute;inset:0;background:radial-gradient(circle at 15% 22%,white 0 2px,transparent 3px),radial-gradient(circle at 80% 60%,white 0 2px,transparent 3px),radial-gradient(circle at 40% 84%,white 0 2px,transparent 3px);background-size:160px 170px,220px 180px,250px 190px;opacity:.9}\n.arena:after{content:\"\";pointer-events:none;position:absolute;width:130%;height:34%;border:2px solid #ffffff80;bottom:-25%;left:-15%;border-radius:50%;transform:rotate(-17deg)}\n.playfield{position:absolute;inset:0;touch-action:none;cursor:crosshair;z-index:1}\n.bottle{position:absolute;top:0;left:0;width:70px;height:146px;pointer-events:none;user-select:none;will-change:transform;display:flex;align-items:center;justify-content:center}\n.bottle img{height:100%;width:100%;object-fit:contain;filter:none;pointer-events:none}\n.bottle:has(img[src=\"\"]){background:#bfcbd2}\n.hud{display:flex;position:absolute;top:10px;left:10px;right:10px;justify-content:space-between;z-index:3;pointer-events:none}\n.pill{font-size:12px;font-weight:bold;background:#e9f9ffec;color:#07576e;padding:9px 12px;border:1px solid #7ac7e0;border-radius:30px}\n.shooter{position:absolute;z-index:2;bottom:0;left:0;right:0;text-align:center;pointer-events:none;padding:18px;background:linear-gradient(transparent,#c6e6f9c9);color:#06627b}\n.cross{display:inline-flex;width:56px;height:56px;border-radius:50%;align-items:center;justify-content:center;font-size:36px;border:2px solid #76bcd6;background:#e6faffb8;box-shadow:0 0 0 7px #ffffff60}\n.pop{position:absolute;z-index:4;color:#046178;font-weight:bold;pointer-events:none;animation:float .5s ease-out forwards;font-size:20px;text-shadow:0 1px #fff}\n@keyframes float{to{transform:translateY(-38px);opacity:0}}\n.layer{position:absolute;z-index:5;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#e1f3f9ee;text-align:center}\n.layer.hidden{display:none}.panel{max-width:355px;width:100%;background:#ffffffee;border:1px solid #b0d5e7;border-radius:23px;padding:25px 18px;box-shadow:0 9px 35px #286b8730}\n.panel h1{margin:0 0 10px;color:#066078;font-size:25px}.panel p{line-height:1.8;font-size:14px}.primary{cursor:pointer;background:#076b83;color:white;border:none;border-radius:14px;padding:14px 20px;font-size:16px;font-weight:700;width:100%;margin-top:12px}.primary:active{transform:scale(.98)}\n.secondary{background:white;border:1px solid #a2cadc;color:#08637b;border-radius:12px;padding:11px 15px;cursor:pointer;font-weight:bold}.field{width:100%;border:1px solid #9ec6d8;border-radius:12px;padding:12px;font-size:16px;margin:7px 0;background:#fff;direction:rtl}\n.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}\n.terms-consent{display:flex;align-items:flex-start;gap:8px;text-align:right;font-size:12px;line-height:1.8;margin:12px 0 0;color:#17536a}\n.terms-consent input{margin-top:6px;width:18px;height:18px;flex-shrink:0;accent-color:#08728a}\n.text-link{font:inherit;color:#075f7a;text-decoration:underline;border:0;background:none;padding:0;cursor:pointer}\n.form-error{color:#b42318;font-size:12px;line-height:1.7;margin:7px 0}\n.terms-modal{position:fixed;inset:0;background:#002b3c99;z-index:1000;display:flex;justify-content:center;align-items:center;padding:18px}\n.terms-panel{width:min(100%,500px);max-height:85vh;overflow:auto;background:#fff;border-radius:20px;padding:24px;box-shadow:0 10px 40px #00283c55}\n.terms-panel h2{font-size:23px;margin:0 0 12px;color:#075b70}.terms-body{font-size:14px;line-height:1.85;text-align:right}\n.note{font-size:12px;color:#517c8a;line-height:1.7}.below{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}.below span{font-size:11px;color:#577f8d}\n#reward{font-size:27px;color:#086c84;font-weight:900}.hidden{display:none!important}\n@media(max-height:690px){.arena{height:60vh;min-height:330px}.app{padding-top:6px}.stats{margin:5px 0}.stat{padding:6px 3px}}\n\n:host{box-sizing:border-box;display:block;isolation:isolate;font-family:Tahoma,Arial,sans-serif;color:#10465a;}\n*,*::before,*::after{box-sizing:border-box}\n.app{width:min(100%,550px);margin:0 auto;padding:12px 12px 26px;background:linear-gradient(165deg,#f2fbff,#cfe9f8);min-height:100%}\n.arena{height:min(60dvh,580px);min-height:355px}\n.terms-modal{z-index:999}\n.mahasen-shadow-close{position:sticky;top:5px;float:left;z-index:1200;background:#06657c;color:white;border:0;width:42px;height:42px;border-radius:50%;cursor:pointer;font:bold 28px Arial;line-height:42px;margin:10px}\n@media(max-width:440px){.top{padding:0 8px}.logo{font-size:24px}.stats{margin-top:6px}.pill{font-size:11px}}\n</style><button id=\"mahasen-shadow-close\" class=\"mahasen-shadow-close\" type=\"button\" aria-label=\"إغلاق اللعبة\">×</button><main class=\"app\">\n<header class=\"top\"><div><div class=\"logo\">✦ محاسن</div><div class=\"sub\">Mahasin Bottle Blaster</div></div><div class=\"top-actions\"><button id=\"soundToggle\" class=\"sound-toggle\" type=\"button\" aria-label=\"كتم الصوت\" aria-pressed=\"true\">🔊 الصوت شغال</button></div></header>\n<section class=\"stats\"><div class=\"stat\"><strong id=\"score\">0</strong><small>النقاط</small></div><div class=\"stat\"><strong id=\"level\">1</strong><small>المستوى</small></div><div class=\"stat\"><strong id=\"time\">60</strong><small>ثانية</small></div></section>\n<section class=\"arena\" id=\"arena\">\n<div class=\"playfield\" id=\"field\"></div><div class=\"hud\"><div class=\"pill\" id=\"hits\">إصابات: 0 / 0</div><div class=\"pill\" id=\"gravity\">الجاذبية 1.0×</div></div>\n<div class=\"shooter\"><div class=\"cross\">⌖</div></div>\n<div class=\"layer\" id=\"intro\"><div class=\"panel\"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن! تبدأ اللعبة سهلة، ثم تزيد سرعة وحركة الأهداف تدريجيًا حتى التحدي الأصعب.</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class=\"terms-consent\"><input type=\"checkbox\" id=\"agreeTerms\"> <span>أوافق على <button type=\"button\" id=\"showTerms\" class=\"text-link\">شروط وأحكام المشاركة</button> و<a href=\"https://mahasen.com/pages/104757\" target=\"_blank\" rel=\"noopener\" class=\"text-link\">سياسة خصوصية المتجر</a>.</span></label><p id=\"termsError\" class=\"form-error hidden\" role=\"alert\">يرجى الموافقة على الشروط قبل اللعب.</p><button class=\"primary\" id=\"start\">ابدأ التحدي</button></div></div>\n<div class=\"layer hidden\" id=\"result\"><div class=\"panel\"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id=\"finalScore\">0</strong> نقطة</p><div id=\"reward\"></div><p id=\"accuracy\"></p><div id=\"claimForm\"><p>سجّل بياناتك لاستكمال طلب الجائزة.</p><p class=\"note\">هذه نسخة تجربة: لا تُحفظ البيانات ولا يُصدر كوبون فعلي حتى إطلاق الحملة.</p><input class=\"field\" id=\"customerName\" autocomplete=\"off\" placeholder=\"الاسم\"><input class=\"field\" id=\"phone\" inputmode=\"tel\" autocomplete=\"off\" placeholder=\"رقم الجوال\"><label class=\"note\"><input type=\"checkbox\" id=\"consent\"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label><button class=\"primary\" id=\"claim\">معاينة استلام الجائزة</button></div><p class=\"note hidden\" id=\"confirmation\">✅ اكتملت معاينة استلام الجائزة. لا يتم حفظ بياناتك أو إصدار كوبون في هذه النسخة.</p><button class=\"secondary\" id=\"again\">العب مرة تانية</button></div></div>\n</section>\n<div class=\"terms-modal hidden\" id=\"termsModal\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"termsTitle\"><div class=\"terms-panel\"><h2 id=\"termsTitle\">شروط تحدي محاسن</h2><div class=\"terms-body\"><p>هذه لعبة ترويجية تعتمد على مهارة التصويب. مدة الجولة 60 ثانية، وتتدرج الصعوبة خلال خمسة مستويات. تُحدد فئة الجائزة حسب النقاط ودقة التصويب.</p><p>المشاركة اختيارية. لا يتطلب اللعب شراء منتج. يجب الالتزام بقواعد اللعبة، ويُحظر التلاعب بالنتائج أو استخدام أدوات آلية.</p><p>الجوائز الظاهرة في هذه النسخة توضيحية وغير قابلة للاسترداد. ستُنشر شروط الجوائز الفعلية، وحدود المحاولات، والأهلية، وصلاحية الأكواد قبل إطلاق الحملة.</p><p>عند تفعيل الجوائز قد يُطلب رقم الجوال للتحقق والتسليم وفق سياسة الخصوصية المعتمدة. الموافقة على الرسائل التسويقية اختيارية ومنفصلة.</p><p>تطبق شروط الحملة الفعلية عند إعلان إطلاقها رسميًا، ولا تمنح هذه النسخة التجريبية جوائز قابلة للاسترداد.</p></div><button class=\"primary\" id=\"closeTerms\" type=\"button\">فهمت الشروط</button></div></div>\n<div class=\"below\"><span>🎯 اضغط على الزجاجات لتصيبها</span><button class=\"secondary\" id=\"reset\">إعادة اللعب ↻</button></div>\n<span id=\"soundStatus\" class=\"sr-only\" role=\"status\" aria-live=\"polite\"></span></main><div id=\"mahasen-setup-error\" style=\"background:#fff4e9;color:#934000;padding:12px;text-align:center;margin:auto;max-width:550px\" hidden>تعذر تشغيل اللعبة في هذا المتصفح.</div>";
+ var closeButton=root.getElementById('mahasen-shadow-close');
+ closeButton.addEventListener('click',close);
+ document.body.appendChild(host);
+ document.body.style.overflow='hidden';
+ lifecycle={};
+ try{initGame(root,lifecycle);push('mahasen_widget_open');}
+ catch(err){
+   console.error('Mahasen game initialization error',err);
+   var panel=root.getElementById('mahasen-setup-error');
+   if(panel)panel.hidden=false;
+ }
+ closeButton.focus();
+}
+function addButton(){
+ if(!document.body||document.getElementById('mahasen-widget-launch'))return;
+ var b=document.createElement('button');
+ b.id='mahasen-widget-launch';
+ b.type='button';b.textContent='🎯 العب واربح مع محاسن';
+ b.style.cssText='position:fixed;bottom:24px;right:18px;z-index:2147483000;background:#076b83;color:#fff;border:0;border-radius:28px;padding:14px 20px;font:700 15px Tahoma,Arial,sans-serif;box-shadow:0 5px 20px #002a3f55;cursor:pointer;max-width:calc(100vw - 36px)';
+ b.addEventListener('click',open);
+ document.body.appendChild(b);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&host)close();});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addButton,{once:true});
+else addButton();
+function initGame(root,lifecycle){
 
-  var ORIGIN = 'https://adhamfawzy11.github.io';
-  var GAME_URL = ORIGIN + '/mahasen-game/?embed=1&v=9';
-  var frame = null, overlay = null, previousOverflow = '';
-  var previousFocus = null, fallbackTimer = null, ready = false;
-
-  function eventToGTM(payload) {
-    if (!payload || typeof payload.event !== 'string' ||
-        payload.event.indexOf('mahasen_') !== 0) return;
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(payload);
-  }
-
-  function style(el, css) { el.style.cssText = css; return el; }
-
-  function closeGame() {
-    if (!overlay) return;
-    if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
-    overlay.parentNode && overlay.parentNode.removeChild(overlay);
-    overlay = null; frame = null; ready = false;
-    document.body.style.overflow = previousOverflow;
-    if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
-    eventToGTM({event: 'mahasen_widget_close', game_version: 'v9'});
-  }
-
-  function openGame() {
-    if (overlay || !document.body) return;
-
-    previousFocus = document.activeElement;
-    previousOverflow = document.body.style.overflow;
-    ready = false;
-
-    overlay = style(document.createElement('div'),
-      'position:fixed;inset:0;z-index:2147483647;background:rgba(0,19,28,.77);display:flex;align-items:center;justify-content:center;padding:9px;box-sizing:border-box;');
-    overlay.id = 'mahasen-widget-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-label', 'لعبة محاسن');
-    overlay.setAttribute('aria-modal', 'true');
-
-    var shell = style(document.createElement('div'),
-      'position:relative;width:100%;max-width:540px;height:94vh;height:94dvh;max-height:900px;background:#e1f4fb;border-radius:18px;overflow:hidden;box-shadow:0 14px 50px #001d2e66;');
-
-    frame = style(document.createElement('iframe'),
-      'display:block;width:100%;height:100%;border:0;background:#e1f4fb;');
-    frame.title = 'تحدي محاسن';
-    frame.src = GAME_URL;
-    frame.setAttribute('allow', 'autoplay');
-    frame.setAttribute('loading', 'eager');
-
-    var status = style(document.createElement('div'),
-      'position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:13px;text-align:center;padding:25px;background:#e1f4fb;color:#075f78;font:600 15px Tahoma,Arial,sans-serif;box-sizing:border-box;');
-    status.id = 'mahasen-game-load-status';
-
-    var message = document.createElement('div');
-    message.textContent = 'جارٍ تحميل تحدي محاسن…';
-
-    var openDirect = style(document.createElement('a'),
-      'display:none;background:#076b83;color:#fff;padding:12px 17px;border-radius:13px;text-decoration:none;font:700 14px Tahoma,Arial,sans-serif;');
-    openDirect.textContent = 'افتح اللعبة مباشرة';
-    openDirect.href = GAME_URL;
-    openDirect.target = '_blank';
-    openDirect.rel = 'noopener noreferrer';
-
-    var retry = style(document.createElement('button'),
-      'display:none;background:#fff;border:1px solid #8bbfcf;color:#075f78;padding:10px 16px;border-radius:12px;font:700 13px Tahoma,Arial,sans-serif;cursor:pointer;');
-    retry.type = 'button';
-    retry.textContent = 'إعادة المحاولة';
-    retry.onclick = function() {
-      if (!frame || ready) return;
-      message.textContent = 'جارٍ إعادة تحميل اللعبة…';
-      openDirect.style.display = 'none';
-      retry.style.display = 'none';
-      frame.src = GAME_URL + '&retry=' + Date.now();
-      fallbackTimer = setTimeout(showFallback, 6500);
-    };
-
-    status.appendChild(message);
-    status.appendChild(openDirect);
-    status.appendChild(retry);
-
-    var close = style(document.createElement('button'),
-      'position:absolute;z-index:11;top:12px;left:12px;width:42px;height:42px;border:0;border-radius:50%;background:#08647a;color:#fff;font-size:29px;cursor:pointer;');
-    close.type = 'button';
-    close.setAttribute('aria-label', 'إغلاق اللعبة');
-    close.textContent = '×';
-    close.onclick = closeGame;
-
-    shell.appendChild(frame);
-    shell.appendChild(status);
-    shell.appendChild(close);
-    overlay.appendChild(shell);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeGame(); });
-    document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
-    close.focus();
-
-    function showFallback() {
-      if (!overlay || ready) return;
-      message.textContent = 'اللعبة مش قادرة تظهر داخل النافذة دي. افتحها مباشرة بدل الشاشة الفارغة.';
-      openDirect.style.display = 'inline-block';
-      retry.style.display = 'inline-block';
-      eventToGTM({event:'mahasen_widget_load_timeout',game_version:'v9'});
+(()=>{'use strict';
+const $=id=>root.getElementById(id);
+const field=$('field'), arena=$('arena');
+let soundEnabled=true, audioCtx=null, noiseBuffer=null;
+function ensureAudio(){
+  if(!soundEnabled)return null;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return null;
+    if(!audioCtx)audioCtx=new AC();
+    if(audioCtx.state==='suspended')audioCtx.resume().then(()=>{$('soundStatus').textContent='🔊 الصوت جاهز';}).catch(()=>{$('soundStatus').textContent='الصوت محجوب من المتصفح؛ جرّب Chrome أو Safari مباشرة.';});
+    return audioCtx;
+  }catch(e){return null}
+}
+function shotSound(){
+  const ctx=ensureAudio();if(!ctx)return;
+  try{
+    const t=ctx.currentTime;
+    if(!noiseBuffer){
+      const len=Math.round(ctx.sampleRate*.11);
+      noiseBuffer=ctx.createBuffer(1,len,ctx.sampleRate);
+      const d=noiseBuffer.getChannelData(0);
+      for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.6);
     }
+    const src=ctx.createBufferSource();src.buffer=noiseBuffer;
+    const filter=ctx.createBiquadFilter();filter.type='highpass';filter.frequency.value=370;
+    const gain=ctx.createGain();gain.gain.setValueAtTime(.42,t);
+    gain.gain.exponentialRampToValueAtTime(.001,t+.1);
+    src.connect(filter).connect(gain).connect(ctx.destination);
+    src.start(t);src.stop(t+.105);
+    const osc=ctx.createOscillator();const g2=ctx.createGain();
+    osc.type='triangle';osc.frequency.setValueAtTime(170,t);
+    osc.frequency.exponentialRampToValueAtTime(65,t+.075);
+    g2.gain.setValueAtTime(.26,t);g2.gain.exponentialRampToValueAtTime(.001,t+.085);
+    osc.connect(g2).connect(ctx.destination);osc.start(t);osc.stop(t+.09);
+  }catch(e){}
+}
+function hitSound(){
+  const ctx=ensureAudio();if(!ctx)return;
+  try{
+    const t=ctx.currentTime;
+    [620,930].forEach((hz,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain(),start=t+i*.055;
+      o.type='sine';o.frequency.setValueAtTime(hz,start);
+      g.gain.setValueAtTime(.001,start);
+      g.gain.linearRampToValueAtTime(.22,start+.012);
+      g.gain.exponentialRampToValueAtTime(.001,start+.16);
+      o.connect(g).connect(ctx.destination);o.start(start);o.stop(start+.17);
+    });
+  }catch(e){}
+}
+$('soundToggle').addEventListener('click',()=>{
+  soundEnabled=!soundEnabled;
+  $('soundToggle').textContent=soundEnabled?'🔊 الصوت شغال':'🔇 الصوت مكتوم';
+  $('soundToggle').setAttribute('aria-pressed',String(soundEnabled));
+  $('soundToggle').setAttribute('aria-label',soundEnabled?'كتم الصوت':'تشغيل الصوت');
+  if(soundEnabled)ensureAudio();
+});
 
-    fallbackTimer = setTimeout(showFallback, 6500);
-    overlay._onGameReady = function() {
-      if (ready || !overlay) return;
-      ready = true;
-      clearTimeout(fallbackTimer); fallbackTimer = null;
-      status.style.display = 'none';
-      eventToGTM({event:'mahasen_widget_ready',game_version:'v9'});
-    };
-    eventToGTM({event:'mahasen_widget_open',game_version:'v9'});
-  }
 
-  window.addEventListener('message', function (e) {
-    if (e.origin !== ORIGIN || !frame || e.source !== frame.contentWindow) return;
-    var d = e.data;
-    if (!d || d.type !== 'mahasen_game_event' || !d.payload) return;
-    if (d.payload.event === 'mahasen_ready' && overlay && overlay._onGameReady) {
-      overlay._onGameReady();
-    }
-    eventToGTM(d.payload);
-  });
+// Use the real Mahasin product photo rather than the temporary SVG drawing.
+const imgUrl='https://adhamfawzy11.github.io/mahasen-game/assets/mahasen-bottle.webp?v=10';
+const backupBottle='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="235" viewBox="0 0 100 235"><defs><linearGradient id="a"><stop stop-color="#8a959e"/><stop offset=".27" stop-color="#edf0f2"/><stop offset=".62" stop-color="#c3cbd0"/><stop offset=".86" stop-color="#f8fafb"/><stop offset="1" stop-color="#8c969d"/></linearGradient></defs><rect x="40" y="5" width="20" height="36" rx="5" fill="#f3f6f9" stroke="#bdcbd3"/><rect x="28" y="38" width="44" height="25" rx="4" fill="#fff" stroke="#d3e1e8"/><path d="M27 60Q27 72 17 85Q11 92 11 106V215Q11 227 23 227H77Q89 227 89 215V106Q89 91 83 85Q73 72 73 60Z" fill="url(#a)" stroke="#b0bbc2"/><text x="50" y="133" font-family="Tahoma,Arial" font-size="21" font-weight="bold" text-anchor="middle" fill="#006b7d">محاسن</text><text x="50" y="148" font-family="Arial" font-size="9" text-anchor="middle" fill="#006b7d">Mahasin</text><text x="50" y="196" font-family="Tahoma" font-size="9" text-anchor="middle" fill="#006b7d">زيت محاسن للشعر</text></svg>');
+let bottleImageReady=false;
+const bottlePreload=new Image();
+bottlePreload.onload=function(){bottleImageReady=true;};
+bottlePreload.onerror=function(){bottleImageReady=false;};
+bottlePreload.src=imgUrl;
 
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && overlay) closeGame();
-  });
+function track(name,extra={}){
+ const payload={event:'mahasen_'+name,game_version:'v10',...extra};
+ window.dataLayer=window.dataLayer||[];
+ window.dataLayer.push(payload);
+}
 
-  function addLaunchButton() {
-    if (!document.body || document.getElementById('mahasen-widget-launch')) return;
-    var button = style(document.createElement('button'),
-      'position:fixed;bottom:24px;right:18px;z-index:2147483000;background:#076b83;color:#fff;border:0;border-radius:28px;padding:14px 20px;font:700 15px Tahoma,Arial,sans-serif;box-shadow:0 5px 20px #002a3f55;cursor:pointer;max-width:calc(100vw - 36px);');
-    button.id = 'mahasen-widget-launch';
-    button.type = 'button';
-    button.textContent = '🎯 العب واربح مع محاسن';
-    button.onclick = openGame;
-    document.body.appendChild(button);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addLaunchButton);
-  else addLaunchButton();
+// Tell the outer widget that this page has rendered, rather than relying on iframe.onload.
+track('ready',{embed:window.parent!==window});
+let running=false,started=0,last=0,spawn=0,score=0,hits=0,shots=0,level=1,objects=[],frameId=0,round=0;
+const difficulty=[{name:'سهل',speed:155,spawn:1.2,size:78,sway:8,hitbox:.52},{name:'متوسط',speed:260,spawn:.94,size:68,sway:24,hitbox:.48},{name:'صعب',speed:390,spawn:.72,size:59,sway:52,hitbox:.44},{name:'محترف',speed:540,spawn:.54,size:52,sway:84,hitbox:.40},{name:'أسطوري',speed:720,spawn:.42,size:46,sway:120,hitbox:.37}];
+const rewards=[{min:500,label:'الجائزة الكبرى (تجريبية)'},{min:380,label:'خصم 20% (تجريبي)'},{min:260,label:'خصم 15% (تجريبي)'},{min:160,label:'خصم 10% (تجريبي)'},{min:80,label:'خصم 5% (تجريبي)'},{min:0,label:'حاول مرة تانية!'}];
+function dims(){return {w:Math.max(field.clientWidth,field.getBoundingClientRect().width,240),h:Math.max(field.clientHeight,field.getBoundingClientRect().height,360)}}
+function update(t){$('score').textContent=score;$('level').textContent=level;$('time').textContent=Math.max(0,Math.ceil(60-t));$('hits').textContent='إصابات: '+hits+' / '+shots;$('gravity').textContent='الجاذبية '+(1+(level-1)*.25).toFixed(2)+'×'}
+function remove(o){o.el.remove();objects=objects.filter(x=>x!==o)}
+function add(){const {w}=dims();const settings=difficulty[level-1];const width=settings.size,height=width*2.08;const x=8+Math.random()*Math.max(1,w-width-16);const el=document.createElement('div');el.className='bottle';el.style.width=width+'px';el.style.height=height+'px';const im=document.createElement('img');im.src=bottleImageReady?imgUrl:backupBottle;im.alt='زجاجة محاسن';im.draggable=false;im.onerror=()=>{im.onerror=null;im.src=backupBottle;};el.append(im);field.append(el);const o={el,x,y:-height*0.35,width,height,speed:settings.speed+(Math.random()-.5)*settings.speed*.14,wave:Math.random()*Math.PI*2,phase:Math.random()*6};objects.push(o);draw(o)}
+function draw(o){o.el.style.transform='translate3d('+o.x+'px,'+o.y+'px,0) rotate('+(Math.sin(o.phase)*9)+'deg)'}
+function loop(now){if(!running)return;const dt=Math.min((now-last)/1000,.045);last=now;const t=(now-started)/1000;level=Math.min(5,1+Math.floor(t/12));update(t);if(t>=60){finish();return}
+spawn+=dt;const period=difficulty[level-1].spawn;
+while(spawn>=period){spawn-=period;add()}
+const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt;o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*difficulty[level-1].sway));draw(o);if(o.y>h+8)remove(o)}
+}
+function start(){if(!$('agreeTerms').checked){$('termsError').classList.remove('hidden');$('agreeTerms').focus();return} $('termsError').classList.add('hidden');ensureAudio();track('start',{terms_accepted:true,terms_version:'draft-2026-11-07'});if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);add();frameId=setInterval(function(){try{loop(performance.now())}catch(err){console.error('Mahasen game animation error',err);}},30)}
+function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
+field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();track('shot',{level});let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*difficulty[level-1].hitbox&&Math.abs(y-cy)<o.height*difficulty[level-1].hitbox){hit=o;break}}if(hit){hitSound();hits++;track('hit',{level});const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
+function finish(){running=false;if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];$('finalScore').textContent=score;const accuracy=shots?Math.round(100*hits/shots):0;$('accuracy').textContent='دقة التصويب: '+accuracy+'%';const eligible=accuracy>=45?score:Math.min(score,159);$('reward').textContent=rewards.find(r=>eligible>=r.min).label;$('result').classList.remove('hidden');track('complete',{score,level,accuracy,reward_tier:rewards.find(r=>eligible>=r.min).label});}
+$('start').onclick=start;$('again').onclick=start;$('reset').onclick=start;
+$('showTerms').onclick=()=>{$('termsModal').classList.remove('hidden');$('closeTerms').focus()};
+$('closeTerms').onclick=()=>{$('termsModal').classList.add('hidden');$('showTerms').focus()};
+$('agreeTerms').onchange=()=>{if($('agreeTerms').checked)$('termsError').classList.add('hidden')};
+$('termsModal').addEventListener('click',e=>{if(e.target===$('termsModal'))$('closeTerms').click()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('termsModal').classList.contains('hidden'))$('closeTerms').click()});
+$('claim').onclick=()=>{$('claimForm').classList.add('hidden');$('confirmation').classList.remove('hidden')};
+lifecycle.dispose=function(){running=false;if(frameId)clearInterval(frameId);frameId=null;objects.forEach(o=>o.el.remove());objects=[];};
+})();
+}
 })();
