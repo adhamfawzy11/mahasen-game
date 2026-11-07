@@ -123,11 +123,13 @@ bottlePreload.onerror=function(){bottleImageReady=false;};
 bottlePreload.src=imgUrl;
 
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v8',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v9',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
 
+// Tell the outer widget that this page has rendered, rather than relying on iframe.onload.
+track('ready',{embed:window.parent!==window});
 let running=false,started=0,last=0,spawn=0,score=0,hits=0,shots=0,level=1,objects=[],frameId=0,round=0;
 const difficulty=[{name:'سهل',speed:155,spawn:1.2,size:78,sway:8,hitbox:.52},{name:'متوسط',speed:260,spawn:.94,size:68,sway:24,hitbox:.48},{name:'صعب',speed:390,spawn:.72,size:59,sway:52,hitbox:.44},{name:'محترف',speed:540,spawn:.54,size:52,sway:84,hitbox:.40},{name:'أسطوري',speed:720,spawn:.42,size:46,sway:120,hitbox:.37}];
 const rewards=[{min:500,label:'الجائزة الكبرى (تجريبية)'},{min:380,label:'خصم 20% (تجريبي)'},{min:260,label:'خصم 15% (تجريبي)'},{min:160,label:'خصم 10% (تجريبي)'},{min:80,label:'خصم 5% (تجريبي)'},{min:0,label:'حاول مرة تانية!'}];
