@@ -33,7 +33,7 @@
 </style>
 </head>
 <body><main class="app">
-<header class="top"><div><div class="logo">✦ محاسن</div><div class="sub">Mahasin Bottle Blaster</div></div><div class="top-actions"><button id="soundToggle" class="sound-toggle" type="button" aria-label="كتم الصوت" aria-pressed="true">🔊 الصوت شغال</button><span class="demo">نسخة تجريبية V4</span></div></header>
+<header class="top"><div><div class="logo">✦ محاسن</div><div class="sub">Mahasin Bottle Blaster</div></div><div class="top-actions"><button id="soundTest" class="sound-toggle" type="button">▶ اختبار الصوت</button><button id="soundToggle" class="sound-toggle" type="button" aria-label="كتم الصوت" aria-pressed="true">🔊 الصوت شغال</button><span class="demo">نسخة تجريبية V4</span></div></header>
 <section class="stats"><div class="stat"><strong id="score">0</strong><small>النقاط</small></div><div class="stat"><strong id="level">1</strong><small>المستوى</small></div><div class="stat"><strong id="time">60</strong><small>ثانية</small></div></section>
 <section class="arena" id="arena">
 <div class="playfield" id="field"></div><div class="hud"><div class="pill" id="hits">إصابات: 0 / 0</div><div class="pill" id="gravity">الجاذبية 1.0×</div></div>
@@ -42,7 +42,7 @@
 <div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward"></div><p id="accuracy"></p><div id="claimForm"><p>سيب بيانات تجريبية لمعاينة خطوة استلام الجائزة (لن تُرسل أو تُخزن).</p><input class="field" id="customerName" autocomplete="off" placeholder="الاسم (للتجربة)"><input class="field" id="phone" inputmode="tel" autocomplete="off" placeholder="رقم الجوال (للتجربة)"><label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label><button class="primary" id="claim">معاينة استلام الجائزة</button></div><p class="note hidden" id="confirmation">✅ تم استعراض خطوة التسجيل. لم يتم حفظ أي بيانات أو إصدار كوبون حقيقي.</p><button class="secondary" id="again">العب مرة تانية</button></div></div>
 </section>
 <div class="below"><span>اسحب أو اضغط مباشرة على الزجاجة للتصويب</span><button class="secondary" id="reset">إعادة اللعب ↻</button></div>
-<p class="note">نسخة عامة للاختبار فقط · غير متصلة بـ Google Sheets أو GTM أو كوبونات المتجر.</p></main>
+<p class="note" id="soundStatus" role="status">للتأكد من الصوت اضغط «اختبار الصوت» وارفع مستوى صوت الجهاز.</p><p class="note">نسخة عامة للاختبار فقط · غير متصلة بـ Google Sheets أو كوبونات المتجر. أحداث اللعب مهيأة للربط مع GTM.</p></main>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
@@ -54,7 +54,7 @@ function ensureAudio(){
     const AC=window.AudioContext||window.webkitAudioContext;
     if(!AC)return null;
     if(!audioCtx)audioCtx=new AC();
-    if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+    if(audioCtx.state==='suspended')audioCtx.resume().then(()=>{$('soundStatus').textContent='🔊 الصوت جاهز';}).catch(()=>{$('soundStatus').textContent='الصوت محجوب من المتصفح؛ جرّب Chrome أو Safari مباشرة.';});
     return audioCtx;
   }catch(e){return null}
 }
@@ -70,14 +70,14 @@ function shotSound(){
     }
     const src=ctx.createBufferSource();src.buffer=noiseBuffer;
     const filter=ctx.createBiquadFilter();filter.type='highpass';filter.frequency.value=370;
-    const gain=ctx.createGain();gain.gain.setValueAtTime(.16,t);
+    const gain=ctx.createGain();gain.gain.setValueAtTime(.42,t);
     gain.gain.exponentialRampToValueAtTime(.001,t+.1);
     src.connect(filter).connect(gain).connect(ctx.destination);
     src.start(t);src.stop(t+.105);
     const osc=ctx.createOscillator();const g2=ctx.createGain();
     osc.type='triangle';osc.frequency.setValueAtTime(170,t);
     osc.frequency.exponentialRampToValueAtTime(65,t+.075);
-    g2.gain.setValueAtTime(.12,t);g2.gain.exponentialRampToValueAtTime(.001,t+.085);
+    g2.gain.setValueAtTime(.26,t);g2.gain.exponentialRampToValueAtTime(.001,t+.085);
     osc.connect(g2).connect(ctx.destination);osc.start(t);osc.stop(t+.09);
   }catch(e){}
 }
@@ -89,7 +89,7 @@ function hitSound(){
       const o=ctx.createOscillator(),g=ctx.createGain(),start=t+i*.055;
       o.type='sine';o.frequency.setValueAtTime(hz,start);
       g.gain.setValueAtTime(.001,start);
-      g.gain.linearRampToValueAtTime(.085,start+.012);
+      g.gain.linearRampToValueAtTime(.22,start+.012);
       g.gain.exponentialRampToValueAtTime(.001,start+.16);
       o.connect(g).connect(ctx.destination);o.start(start);o.stop(start+.17);
     });
@@ -102,24 +102,32 @@ $('soundToggle').addEventListener('click',()=>{
   $('soundToggle').setAttribute('aria-label',soundEnabled?'كتم الصوت':'تشغيل الصوت');
   if(soundEnabled)ensureAudio();
 });
+$('soundTest').addEventListener('click',()=>{if(!soundEnabled){soundEnabled=true;$('soundToggle').textContent='🔊 الصوت شغال';$('soundToggle').setAttribute('aria-pressed','true')}const ctx=ensureAudio();if(!ctx){$('soundStatus').textContent='الصوت غير مدعوم أو محجوب في المتصفح الحالي.';return}shotSound();setTimeout(hitSound,170);$('soundStatus').textContent=ctx.state==='running'?'🔊 تم تشغيل صوت تجريبي. لو مش مسموع، ارفع صوت الميديا بالجهاز.':'جاري تفعيل الصوت...';});
 
-const imgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 230\"><defs><linearGradient id=\"m\" x1=\"0\" x2=\"1\"><stop stop-color=\"#8e959b\"/><stop offset=\".16\" stop-color=\"#e9eff1\"/><stop offset=\".48\" stop-color=\"#b9c1c6\"/><stop offset=\".68\" stop-color=\"#f6f8fa\"/><stop offset=\"1\" stop-color=\"#929ca2\"/></linearGradient><linearGradient id=\"w\"><stop stop-color=\"#e3e5e7\"/><stop offset=\".45\" stop-color=\"#fff\"/><stop offset=\"1\" stop-color=\"#c5cbd1\"/></linearGradient></defs><rect x=\"38\" y=\"4\" width=\"25\" height=\"35\" rx=\"6\" fill=\"url(#w)\" stroke=\"#cfd7dc\"/><rect x=\"29\" y=\"32\" width=\"43\" height=\"27\" rx=\"4\" fill=\"#f8fbff\" stroke=\"#cbd1d5\"/><g stroke=\"#cbd3d8\" stroke-width=\".8\"><path d=\"M33 34v23\"/><path d=\"M37 34v23\"/><path d=\"M41 34v23\"/><path d=\"M45 34v23\"/><path d=\"M49 34v23\"/><path d=\"M53 34v23\"/><path d=\"M57 34v23\"/><path d=\"M61 34v23\"/><path d=\"M65 34v23\"/></g><path d=\"M28 57q-3 17-14 27Q9 92 9 110v98q0 14 14 14h54q14 0 14-14v-98q0-18-5-26Q75 74 72 57z\" fill=\"url(#m)\" stroke=\"#a4adb2\" stroke-width=\"1.5\"/><path d=\"M23 88q-7 52-3 112\" fill=\"none\" stroke=\"#fff\" opacity=\".45\" stroke-width=\"4\"/><text x=\"50\" y=\"127\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Tahoma,Arial\" font-size=\"19\" font-weight=\"bold\">محاسن</text><text x=\"50\" y=\"141\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Arial\" font-size=\"8\">Mahasin</text><text x=\"50\" y=\"186\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Tahoma,Arial\" font-size=\"9\" font-weight=\"bold\">زيت محاسن للشعر</text><text x=\"50\" y=\"198\" text-anchor=\"middle\" fill=\"#006575\" font-family=\"Tahoma,Arial\" font-size=\"6\">مستخلصات طبيعية ١٠٠٪</text></svg>");
+// Use the real Mahasin product photo rather than the temporary SVG drawing.
+const imgUrl='https://media.zid.store/69700348-64c8-4da8-a2cb-3b3b12a78746/c2a23f67-90fa-4952-8061-d20ac39a4396.png';
+function track(name,extra={}){
+ const payload={event:'mahasen_'+name,game_version:'v5',...extra};
+ try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
+ try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
+}
+
 let running=false,started=0,last=0,spawn=0,score=0,hits=0,shots=0,level=1,objects=[],frameId=0,round=0;
 const rewards=[{min:500,label:'الجائزة الكبرى (تجريبية)'},{min:380,label:'خصم 20% (تجريبي)'},{min:260,label:'خصم 15% (تجريبي)'},{min:160,label:'خصم 10% (تجريبي)'},{min:80,label:'خصم 5% (تجريبي)'},{min:0,label:'حاول مرة تانية!'}];
 function dims(){return {w:field.clientWidth,h:field.clientHeight}}
 function update(t){$('score').textContent=score;$('level').textContent=level;$('time').textContent=Math.max(0,Math.ceil(60-t));$('hits').textContent='إصابات: '+hits+' / '+shots;$('gravity').textContent='الجاذبية '+(1+(level-1)*.25).toFixed(2)+'×'}
 function remove(o){o.el.remove();objects=objects.filter(x=>x!==o)}
-function add(){const {w}=dims();const width=Math.max(49,70-(level-1)*4),height=width*2.08;const x=8+Math.random()*Math.max(1,w-width-16);const el=document.createElement('div');el.className='bottle';el.style.width=width+'px';el.style.height=height+'px';const im=document.createElement('img');im.src=imgUrl;im.alt='زجاجة محاسن';im.draggable=false;el.append(im);field.append(el);const o={el,x,y:-height,width,height,speed:110+level*33+Math.random()*35,wave:Math.random()*Math.PI*2,phase:Math.random()*6};objects.push(o)}
+function add(){const {w}=dims();const width=Math.max(49,70-(level-1)*4),height=width*2.08;const x=8+Math.random()*Math.max(1,w-width-16);const el=document.createElement('div');el.className='bottle';el.style.width=width+'px';el.style.height=height+'px';const im=document.createElement('img');im.src=imgUrl;im.alt='زجاجة محاسن';im.draggable=false;im.onerror=()=>{im.alt='تعذر تحميل صورة المنتج';};el.append(im);field.append(el);const o={el,x,y:-height,width,height,speed:110+level*33+Math.random()*35,wave:Math.random()*Math.PI*2,phase:Math.random()*6};objects.push(o)}
 function draw(o){o.el.style.transform='translate3d('+o.x+'px,'+o.y+'px,0) rotate('+(Math.sin(o.phase)*9)+'deg)'}
 function loop(now){if(!running)return;const dt=Math.min((now-last)/1000,.045);last=now;const t=(now-started)/1000;level=Math.min(5,1+Math.floor(t/12));update(t);if(t>=60){finish();return}
 spawn+=dt;const period=Math.max(.44,1.17-(level-1)*.16);
 while(spawn>=period){spawn-=period;add()}
 const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt*(1+(level-1)*.12);o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*(level>2?34:9)));draw(o);if(o.y>h+8)remove(o)}
 frameId=requestAnimationFrame(loop)}
-function start(){ensureAudio();cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);frameId=requestAnimationFrame(loop)}
+function start(){ensureAudio();track('start');cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);frameId=requestAnimationFrame(loop)}
 function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
-field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*.54&&Math.abs(y-cy)<o.height*.49){hit=o;break}}if(hit){hitSound();hits++;const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
-function finish(){running=false;cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];$('finalScore').textContent=score;const accuracy=shots?Math.round(100*hits/shots):0;$('accuracy').textContent='دقة التصويب: '+accuracy+'%';const eligible=accuracy>=45?score:Math.min(score,159);$('reward').textContent=rewards.find(r=>eligible>=r.min).label;$('result').classList.remove('hidden');}
+field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();track('shot',{level});let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*.54&&Math.abs(y-cy)<o.height*.49){hit=o;break}}if(hit){hitSound();hits++;track('hit',{level});const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
+function finish(){running=false;cancelAnimationFrame(frameId);for(const o of objects)o.el.remove();objects=[];$('finalScore').textContent=score;const accuracy=shots?Math.round(100*hits/shots):0;$('accuracy').textContent='دقة التصويب: '+accuracy+'%';const eligible=accuracy>=45?score:Math.min(score,159);$('reward').textContent=rewards.find(r=>eligible>=r.min).label;$('result').classList.remove('hidden');track('complete',{score,level,accuracy,reward_tier:rewards.find(r=>eligible>=r.min).label});}
 $('start').onclick=start;$('again').onclick=start;$('reset').onclick=start;
 $('claim').onclick=()=>{$('claimForm').classList.add('hidden');$('confirmation').classList.remove('hidden')};
 })();
