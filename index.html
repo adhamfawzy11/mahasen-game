@@ -194,8 +194,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('termsModal').cl
 $('claim').onclick=()=>{
  if(!claimedReward||!claimedReward.discount)return;
  const name=$('customerName').value.trim();
- const phone=$('phone').value.replace(/[\\s\\-()]/g,'');
- const saudiPhone=/^(?:\\+966|966|0)?5\\d{8}$/.test(phone);
+ const phone=$('phone').value.replace(/[\s()-]/g,'');
+ const saudiPhone=/^(?:\+966|966|0)?5\d{8}$/.test(phone);
  if(name.length<2||!saudiPhone){
   $('claimError').textContent='يرجى إدخال الاسم ورقم جوال سعودي صحيح لاستلام الجائزة.';
   $('claimError').classList.remove('hidden');
