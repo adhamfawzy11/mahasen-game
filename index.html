@@ -36,7 +36,7 @@
 .terms-panel{width:min(100%,500px);max-height:85vh;overflow:auto;background:#fff;border-radius:20px;padding:24px;box-shadow:0 10px 40px #00283c55}
 .terms-panel h2{font-size:23px;margin:0 0 12px;color:#075b70}.terms-body{font-size:14px;line-height:1.85;text-align:right}
 .note{font-size:12px;color:#517c8a;line-height:1.7}.below{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}.below span{font-size:11px;color:#577f8d}
-#reward{font-size:27px;color:#086c84;font-weight:900}.hidden{display:none!important}
+#reward{font-size:22px;color:#086c84;font-weight:900;margin:10px 0}.coupon-card{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:#e9f8fb;border:2px dashed #74b9ce;border-radius:16px;padding:15px 10px;margin:12px 0}.coupon-card strong{font-size:23px;letter-spacing:2px;color:#065b70}.copy-message{font-size:12px;color:#08647a;min-height:18px}.hidden{display:none!important}
 @media(max-height:690px){.arena{height:60vh;min-height:330px}.app{padding-top:6px}.stats{margin:5px 0}.stat{padding:6px 3px}}
 </style>
 </head>
@@ -46,10 +46,23 @@
 <section class="arena" id="arena">
 <div class="playfield" id="field"></div><div class="hud"><div class="pill" id="hits">إصابات: 0 / 0</div><div class="pill" id="gravity">الجاذبية 1.0×</div></div>
 <div class="shooter"><div class="cross">⌖</div></div>
-<div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن! تبدأ اللعبة سهلة، ثم تزيد سرعة وحركة الأهداف تدريجيًا حتى التحدي الأصعب.</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class="terms-consent"><input type="checkbox" id="agreeTerms"> <span>أوافق على <button type="button" id="showTerms" class="text-link">شروط وأحكام المشاركة</button> و<a href="https://mahasen.com/pages/104757" target="_blank" rel="noopener" class="text-link">سياسة خصوصية المتجر</a>.</span></label><p id="termsError" class="form-error hidden" role="alert">يرجى الموافقة على الشروط قبل اللعب.</p><button class="primary" id="start">ابدأ التحدي</button></div></div>
-<div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward"></div><p id="accuracy"></p><div id="claimForm"><p>سجّل بياناتك لاستكمال طلب الجائزة.</p><p class="note">هذه نسخة تجربة: لا تُحفظ البيانات ولا يُصدر كوبون فعلي حتى إطلاق الحملة.</p><input class="field" id="customerName" autocomplete="off" placeholder="الاسم"><input class="field" id="phone" inputmode="tel" autocomplete="off" placeholder="رقم الجوال"><label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label><button class="primary" id="claim">معاينة استلام الجائزة</button></div><p class="note hidden" id="confirmation">✅ اكتملت معاينة استلام الجائزة. لا يتم حفظ بياناتك أو إصدار كوبون في هذه النسخة.</p><button class="secondary" id="again">العب مرة تانية</button></div></div>
+<div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن، واجمع النقاط لتحصل على خصومات حصرية على زيت محاسن للشعر!</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class="terms-consent"><input type="checkbox" id="agreeTerms"> <span>أوافق على <button type="button" id="showTerms" class="text-link">شروط وأحكام المشاركة</button> و<a href="https://mahasen.com/pages/104757" target="_blank" rel="noopener" class="text-link">سياسة خصوصية المتجر</a>.</span></label><p id="termsError" class="form-error hidden" role="alert">يرجى الموافقة على الشروط قبل اللعب.</p><button class="primary" id="start">ابدأ التحدي</button></div></div>
+<div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward" aria-live="polite"></div><p id="accuracy"></p>
+<div id="claimForm">
+  <p>سجّل بياناتك لاستلام الجائزة.</p>
+  <input class="field" id="customerName" autocomplete="name" placeholder="الاسم" maxlength="70" required>
+  <input class="field" id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="رقم الجوال السعودي" maxlength="16" required>
+  <label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label>
+  <p id="claimError" class="form-error hidden" role="alert"></p>
+  <button class="primary" id="claim" type="button">استلام الجائزة</button>
+</div>
+<div id="confirmation" class="hidden">
+ <p>🎉 مبروك! هذا كود الخصم الخاص بفئة نقاطك:</p>
+ <div class="coupon-card"><strong id="couponCode" dir="ltr"></strong><button type="button" id="copyCoupon" class="secondary">نسخ كود الخصم</button></div>
+ <p id="copyMessage" class="copy-message" aria-live="polite"></p>
+</div><button class="secondary" id="again">العب مرة تانية</button></div></div>
 </section>
-<div class="terms-modal hidden" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle"><div class="terms-panel"><h2 id="termsTitle">شروط تحدي محاسن</h2><div class="terms-body"><p>هذه لعبة ترويجية تعتمد على مهارة التصويب. مدة الجولة 60 ثانية، وتتدرج الصعوبة خلال خمسة مستويات. تُحدد فئة الجائزة حسب النقاط ودقة التصويب.</p><p>المشاركة اختيارية. لا يتطلب اللعب شراء منتج. يجب الالتزام بقواعد اللعبة، ويُحظر التلاعب بالنتائج أو استخدام أدوات آلية.</p><p>الجوائز الظاهرة في هذه النسخة توضيحية وغير قابلة للاسترداد. ستُنشر شروط الجوائز الفعلية، وحدود المحاولات، والأهلية، وصلاحية الأكواد قبل إطلاق الحملة.</p><p>عند تفعيل الجوائز قد يُطلب رقم الجوال للتحقق والتسليم وفق سياسة الخصوصية المعتمدة. الموافقة على الرسائل التسويقية اختيارية ومنفصلة.</p><p>تطبق شروط الحملة الفعلية عند إعلان إطلاقها رسميًا، ولا تمنح هذه النسخة التجريبية جوائز قابلة للاسترداد.</p></div><button class="primary" id="closeTerms" type="button">فهمت الشروط</button></div></div>
+<div class="terms-modal hidden" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle"><div class="terms-panel"><h2 id="termsTitle">شروط تحدي محاسن</h2><div class="terms-body"><p>هذه لعبة خاصة بمتجر محاسن تعتمد على مهارة التصويب. مدة الجولة 60 ثانية، وتتدرج الصعوبة خلال خمسة مستويات. تُحدد فئة الجائزة حسب النقاط ودقة التصويب.</p><p>المشاركة اختيارية. لا يتطلب اللعب شراء منتج. يجب الالتزام بقواعد اللعبة، ويُحظر التلاعب بالنتائج أو استخدام أدوات آلية.</p><p>عند تحقيق شروط الفوز، يمكنك طلب جائزتك بعد انتهاء اللعبة، وسيُطلب منك رقم الجوال للتحقق والتسليم وفق سياسة الخصوصية المعتمدة. الموافقة على الرسائل التسويقية اختيارية ومنفصلة.</p><p>لاستحقاق الخصم، يجب ألا تقل دقة التصويب عن 45%. وتُحدد الجوائز بحسب النقاط: 0–100 بدون جائزة، 101–300 خصم 5%، 301–600 خصم 10%، 601–900 خصم 15%، ومن 901 نقطة فأكثر خصم 20% كحد أقصى. تخضع الأكواد للتفعيل والتحقق من المتجر.</p></div><button class="primary" id="closeTerms" type="button">فهمت الشروط</button></div></div>
 <div class="below"><span>🎯 اضغط على الزجاجات لتصيبها</span><button class="secondary" id="reset">إعادة اللعب ↻</button></div>
 <span id="soundStatus" class="sr-only" role="status" aria-live="polite"></span></main>
 <script>
@@ -123,7 +136,7 @@ bottlePreload.onerror=function(){bottleImageReady=false;};
 bottlePreload.src=imgUrl;
 
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v9',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v11',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
@@ -132,7 +145,13 @@ function track(name,extra={}){
 track('ready',{embed:window.parent!==window});
 let running=false,started=0,last=0,spawn=0,score=0,hits=0,shots=0,level=1,objects=[],frameId=0,round=0;
 const difficulty=[{name:'سهل',speed:155,spawn:1.2,size:78,sway:8,hitbox:.52},{name:'متوسط',speed:260,spawn:.94,size:68,sway:24,hitbox:.48},{name:'صعب',speed:390,spawn:.72,size:59,sway:52,hitbox:.44},{name:'محترف',speed:540,spawn:.54,size:52,sway:84,hitbox:.40},{name:'أسطوري',speed:720,spawn:.42,size:46,sway:120,hitbox:.37}];
-const rewards=[{min:500,label:'الجائزة الكبرى (تجريبية)'},{min:380,label:'خصم 20% (تجريبي)'},{min:260,label:'خصم 15% (تجريبي)'},{min:160,label:'خصم 10% (تجريبي)'},{min:80,label:'خصم 5% (تجريبي)'},{min:0,label:'حاول مرة تانية!'}];
+const rewards=[
+ {min:901,max:Infinity,label:'مستوى خرافي في التصويب',discount:20,code:'MGT20'},
+ {min:601,max:900,label:'مستوى رهيب في التصويب',discount:15,code:'MFT15'},
+ {min:301,max:600,label:'مستوى جيد في التصويب',discount:10,code:'MMT10'},
+ {min:101,max:300,label:'مستوى متوسط في التصويب',discount:5,code:'MBT5'},
+ {min:0,max:100,label:'مستوى هاوي في التصويب',discount:0,code:null}
+];
 function dims(){return {w:Math.max(field.clientWidth,field.getBoundingClientRect().width,240),h:Math.max(field.clientHeight,field.getBoundingClientRect().height,360)}}
 function update(t){$('score').textContent=score;$('level').textContent=level;$('time').textContent=Math.max(0,Math.ceil(60-t));$('hits').textContent='إصابات: '+hits+' / '+shots;$('gravity').textContent='الجاذبية '+(1+(level-1)*.25).toFixed(2)+'×'}
 function remove(o){o.el.remove();objects=objects.filter(x=>x!==o)}
@@ -146,13 +165,61 @@ const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt;o.phase+=dt*(1+l
 function start(){if(!$('agreeTerms').checked){$('termsError').classList.remove('hidden');$('agreeTerms').focus();return} $('termsError').classList.add('hidden');ensureAudio();track('start',{terms_accepted:true,terms_version:'draft-2026-11-07'});if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);add();frameId=setInterval(function(){try{loop(performance.now())}catch(err){console.error('Mahasen game animation error',err);}},30)}
 function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
 field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();track('shot',{level});let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*difficulty[level-1].hitbox&&Math.abs(y-cy)<o.height*difficulty[level-1].hitbox){hit=o;break}}if(hit){hitSound();hits++;track('hit',{level});const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
-function finish(){running=false;if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];$('finalScore').textContent=score;const accuracy=shots?Math.round(100*hits/shots):0;$('accuracy').textContent='دقة التصويب: '+accuracy+'%';const eligible=accuracy>=45?score:Math.min(score,159);$('reward').textContent=rewards.find(r=>eligible>=r.min).label;$('result').classList.remove('hidden');track('complete',{score,level,accuracy,reward_tier:rewards.find(r=>eligible>=r.min).label});}
+let claimedReward=null;
+function rewardFor(scoreValue,accuracyValue){
+ if(accuracyValue<45)return rewards[rewards.length-1];
+ return rewards.find(r=>scoreValue>=r.min)||rewards[rewards.length-1];
+}
+function finish(){
+ running=false;if(frameId)clearInterval(frameId);frameId=null;
+ for(const o of objects)o.el.remove();objects=[];
+ $('finalScore').textContent=score;
+ const accuracy=shots?Math.round(100*hits/shots):0;
+ $('accuracy').textContent='دقة التصويب: '+accuracy+'%';
+ claimedReward=rewardFor(score,accuracy);
+ $('reward').textContent=claimedReward.discount?claimedReward.label+' — جائزتك خصم '+claimedReward.discount+'%':claimedReward.label+' — لم تحصل على جائزة';
+ $('claimForm').classList.toggle('hidden',!claimedReward.discount);
+ $('confirmation').classList.add('hidden');
+ $('claimError').classList.add('hidden');
+ $('copyMessage').textContent='';
+ $('result').classList.remove('hidden');
+ track('complete',{score,level,accuracy,reward_tier:claimedReward.discount+'pct'});
+}
 $('start').onclick=start;$('again').onclick=start;$('reset').onclick=start;
 $('showTerms').onclick=()=>{$('termsModal').classList.remove('hidden');$('closeTerms').focus()};
 $('closeTerms').onclick=()=>{$('termsModal').classList.add('hidden');$('showTerms').focus()};
 $('agreeTerms').onchange=()=>{if($('agreeTerms').checked)$('termsError').classList.add('hidden')};
 $('termsModal').addEventListener('click',e=>{if(e.target===$('termsModal'))$('closeTerms').click()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('termsModal').classList.contains('hidden'))$('closeTerms').click()});
-$('claim').onclick=()=>{$('claimForm').classList.add('hidden');$('confirmation').classList.remove('hidden')};
+$('claim').onclick=()=>{
+ if(!claimedReward||!claimedReward.discount)return;
+ const name=$('customerName').value.trim();
+ const phone=$('phone').value.replace(/[\\s\\-()]/g,'');
+ const saudiPhone=/^(?:\\+966|966|0)?5\\d{8}$/.test(phone);
+ if(name.length<2||!saudiPhone){
+  $('claimError').textContent='يرجى إدخال الاسم ورقم جوال سعودي صحيح لاستلام الجائزة.';
+  $('claimError').classList.remove('hidden');
+  return;
+ }
+ $('claimError').classList.add('hidden');
+ $('couponCode').textContent=claimedReward.code;
+ $('claimForm').classList.add('hidden');
+ $('confirmation').classList.remove('hidden');
+ track('reward_claim_preview',{score,reward_tier:claimedReward.discount+'pct'});
+};
+$('copyCoupon').onclick=()=>{
+ const coupon=$('couponCode').textContent;
+ if(!coupon)return;
+ function copied(ok){$('copyMessage').textContent=ok?'تم نسخ الكود ✅':'انسخ الكود الظاهر بالأعلى.';}
+ if(navigator.clipboard&&navigator.clipboard.writeText){
+  navigator.clipboard.writeText(coupon).then(()=>copied(true)).catch(()=>copied(false));
+ }else{
+  const input=document.createElement('textarea');
+  input.value=coupon;input.setAttribute('readonly','');input.style.position='fixed';input.style.opacity='0';
+  document.body.appendChild(input);input.select();
+  try{copied(document.execCommand('copy'));}catch(e){copied(false)}
+  input.remove();
+ }
+};
 })();
 </script></body></html>
