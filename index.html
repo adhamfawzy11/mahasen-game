@@ -223,7 +223,7 @@ field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();c
 let claimedReward=null;
 let finalAccuracy=0;
 let submissionSessionId=null;
-const leadEndpoint='https://hdbicemwgnqkzfservan.supabase.co/functions/v1/mahasen-save-lead-test';
+const leadEndpoint='https://hdbicemwgnqkzfservan.supabase.co/functions/v1/mahasen-collect-lead';
 function rewardFor(scoreValue,accuracyValue){
  if(accuracyValue<45)return rewards[rewards.length-1];
  return rewards.find(r=>scoreValue>=r.min)||rewards[rewards.length-1];
