@@ -38,6 +38,42 @@
 .note{font-size:12px;color:#517c8a;line-height:1.7}.below{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}.below span{font-size:11px;color:#577f8d}
 #reward{font-size:22px;color:#086c84;font-weight:900;margin:10px 0}.coupon-card{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:#e9f8fb;border:2px dashed #74b9ce;border-radius:16px;padding:15px 10px;margin:12px 0}.coupon-card strong{font-size:23px;letter-spacing:2px;color:#065b70}.copy-message{font-size:12px;color:#08647a;min-height:18px}.hidden{display:none!important}
 @media(max-height:690px){.arena{height:60vh;min-height:330px}.app{padding-top:6px}.stats{margin:5px 0}.stat{padding:6px 3px}}
+
+/* Mahasen mobile responsive refinements — v12 */
+:root{--teal:#08677b;--navy:#064d5f;--sky:#e5f5fb}
+html,body{overflow-x:hidden}
+.logo{color:#066277}
+.primary{background:#076b80}
+.primary:focus-visible,.secondary:focus-visible,.text-link:focus-visible{outline:3px solid #0b7186;outline-offset:3px}
+.panel{max-width:360px}
+.layer{overflow-y:auto;overscroll-behavior:contain;align-items:flex-start;padding:14px}
+.layer .panel{margin:auto}
+.terms-modal{overflow-y:auto;padding:12px}
+.terms-panel{max-height:min(85vh,760px)}
+@media(max-width:600px){
+ .app{max-width:none;width:100%;padding:calc(8px + env(safe-area-inset-top,0px)) 10px calc(15px + env(safe-area-inset-bottom,0px));}
+ .top{padding:0 7px;min-height:48px}
+ .logo{font-size:25px}
+ .stats{gap:5px;margin:7px 0}
+ .stat{padding:7px 3px;border-radius:12px}
+ .stat strong{font-size:21px}
+ .stat small{font-size:11px}
+ .arena{height:calc(100dvh - 212px);min-height:340px;max-height:680px;border-radius:19px}
+ .layer{padding:10px}
+ .layer .panel{padding:19px 16px;border-radius:18px;max-width:min(100%,375px)}
+ .panel h1{font-size:22px}
+ .panel p{font-size:13px;line-height:1.7}
+ .below{margin-top:9px}
+ .sound-toggle{font-size:11px;padding:8px 10px}
+}
+@media(max-width:390px){
+ .arena{height:calc(100dvh - 195px);min-height:315px}
+ .panel p{font-size:12.5px}
+}
+@media(max-height:620px) and (max-width:600px){
+ .arena{min-height:305px;height:calc(100dvh - 180px)}
+ .stat strong{font-size:19px}
+}
 </style>
 </head>
 <body><main class="app">
@@ -46,7 +82,7 @@
 <section class="arena" id="arena">
 <div class="playfield" id="field"></div><div class="hud"><div class="pill" id="hits">إصابات: 0 / 0</div><div class="pill" id="gravity">الجاذبية 1.0×</div></div>
 <div class="shooter"><div class="cross">⌖</div></div>
-<div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن، واجمع النقاط لتحصل على خصومات حصرية على زيت محاسن للشعر!</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class="terms-consent"><input type="checkbox" id="agreeTerms"> <span>أوافق على <button type="button" id="showTerms" class="text-link">شروط وأحكام المشاركة</button> و<a href="https://mahasen.com/pages/104757" target="_blank" rel="noopener" class="text-link">سياسة خصوصية المتجر</a>.</span></label><p id="termsError" class="form-error hidden" role="alert">يرجى الموافقة على الشروط قبل اللعب.</p><button class="primary" id="start">ابدأ التحدي</button></div></div>
+<div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن واجمع النقاط لتحصل على خصومات حصرية على زيت محاسن للشعر!</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class="terms-consent"><input type="checkbox" id="agreeTerms"> <span>أوافق على <button type="button" id="showTerms" class="text-link">شروط وأحكام المشاركة</button> و<a href="https://mahasen.com/pages/104757" target="_blank" rel="noopener" class="text-link">سياسة خصوصية المتجر</a>.</span></label><p id="termsError" class="form-error hidden" role="alert">يرجى الموافقة على الشروط قبل اللعب.</p><button class="primary" id="start">ابدأ التحدي</button></div></div>
 <div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward" aria-live="polite"></div><p id="accuracy"></p>
 <div id="claimForm">
   <p>سجّل بياناتك لاستلام الجائزة.</p>
@@ -136,7 +172,7 @@ bottlePreload.onerror=function(){bottleImageReady=false;};
 bottlePreload.src=imgUrl;
 
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v11',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v12',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
