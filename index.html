@@ -85,16 +85,16 @@ html,body{overflow-x:hidden}
 <div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن واجمع النقاط لتحصل على خصومات حصرية على زيت محاسن الشعر!</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class="terms-consent"><input type="checkbox" id="agreeTerms"> <span>أوافق على <button type="button" id="showTerms" class="text-link">شروط وأحكام المشاركة</button> و<a href="https://mahasen.com/pages/104757" target="_blank" rel="noopener" class="text-link">سياسة خصوصية المتجر</a>.</span></label><p id="termsError" class="form-error hidden" role="alert">يرجى الموافقة على الشروط قبل اللعب.</p><button class="primary" id="start">ابدأ التحدي</button></div></div>
 <div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward" aria-live="polite"></div><p id="accuracy"></p>
 <div id="claimForm">
-  <p>تجربة حفظ البيانات على Supabase: استخدم اسمًا وهميًا ورقم <strong dir="ltr">0500000000</strong> أو <strong dir="ltr">0500000001</strong>.</p>
+  <p>سجّل اسمك ورقم جوالك لاستكمال المشاركة.</p><p class="note">سنتعامل مع بياناتك وفق سياسة الخصوصية. الرسائل التسويقية اختيارية.</p>
   <input class="field" id="customerName" autocomplete="name" placeholder="الاسم" maxlength="70" required>
   <input class="field" id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="رقم الجوال السعودي" maxlength="16" required>
   <label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label>
   <p id="claimError" class="form-error hidden" role="alert"></p>
-  <button class="primary" id="claim" type="button">اختبار حفظ البيانات واستلام الجائزة</button>
+  <button class="primary" id="claim" type="button">تسجيل البيانات</button>
 </div>
 <div id="confirmation" class="hidden">
- <p>🎉 تم حفظ البيانات التجريبية بنجاح! كود الخصم التوضيحي:</p>
- <div class="coupon-card"><strong id="couponCode" dir="ltr"></strong><button type="button" id="copyCoupon" class="secondary">نسخ كود الخصم</button></div>
+ <p>✅ تم تسجيل بياناتك بنجاح. سيتم إعلان تفاصيل استلام الجوائز بعد اعتماد الحملة.</p>
+ <div class="coupon-card hidden" id="couponPanel"><strong id="couponCode" dir="ltr"></strong><button type="button" id="copyCoupon" class="secondary">نسخ كود الخصم</button></div>
  <p id="copyMessage" class="copy-message" aria-live="polite"></p>
 </div><button class="secondary" id="again">العب مرة تانية</button></div></div>
 </section>
@@ -172,7 +172,7 @@ bottlePreload.onerror=function(){bottleImageReady=false;};
 bottlePreload.src=imgUrl;
 
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v14',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v15',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
@@ -206,7 +206,7 @@ async function start(){
  starting=true;const startButton=$('start');
  startButton.disabled=true;startButton.textContent='جارٍ تجهيز التحدي...';
  try{
-  const response=await fetch('https://hdbicemwgnqkzfservan.supabase.co/functions/v1/mahasen-save-lead-test',
+  const response=await fetch('https://hdbicemwgnqkzfservan.supabase.co/functions/v1/mahasen-collect-lead',
    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start'})});
   const json=await response.json();
   if(!response.ok||!json.attempt_token)throw new Error('لا يمكن بدء التحدي الآن. حاول مرة أخرى.');
@@ -237,7 +237,7 @@ function finish(){
  $('accuracy').textContent='دقة التصويب: '+accuracy+'%';
  claimedReward=rewardFor(score,accuracy);
  $('reward').textContent=claimedReward.discount?claimedReward.label+' — جائزتك خصم '+claimedReward.discount+'%':claimedReward.label+' — لم تحصل على جائزة';
- $('claimForm').classList.toggle('hidden',!claimedReward.discount);
+ $('claimForm').classList.remove('hidden');
  $('confirmation').classList.add('hidden');
  $('claimError').classList.add('hidden');
  $('copyMessage').textContent='';
@@ -251,17 +251,12 @@ $('agreeTerms').onchange=()=>{if($('agreeTerms').checked)$('termsError').classLi
 $('termsModal').addEventListener('click',e=>{if(e.target===$('termsModal'))$('closeTerms').click()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('termsModal').classList.contains('hidden'))$('closeTerms').click()});
 $('claim').onclick=async()=>{
- if(!claimedReward||!claimedReward.discount)return;
+ if(!claimedReward)return;
  if(!attemptToken){$('claimError').textContent='جلسة اللعب غير صالحة، أعد اللعب.';$('claimError').classList.remove('hidden');return;}
  const name=$('customerName').value.trim();
  const phone=$('phone').value.replace(/[\s()-]/g,'');
  if(name.length<2||!/^(?:\+966|966|0)?5\d{8}$/.test(phone)){
   $('claimError').textContent='اكتب اسمًا وهميًا ورقم جوال سعودي تجريبي صحيح.';
-  $('claimError').classList.remove('hidden');return;
- }
- const normalized=phone.replace(/^(?:\+966|966|0)/,'');
- if(!['500000000','500000001'].includes(normalized)){
-  $('claimError').textContent='الاختبار يقبل رقم 0500000000 أو 0500000001 فقط. لا تدخل رقمك الحقيقي.';
   $('claimError').classList.remove('hidden');return;
  }
  $('claimError').classList.add('hidden');
@@ -275,7 +270,7 @@ $('claim').onclick=async()=>{
   }
   const params=new URLSearchParams(window.location.search);
   const payload={
-   action:'claim',attempt_token:attemptToken,test_mode:true,terms_accepted:$('agreeTerms').checked,
+   action:'claim',attempt_token:attemptToken,terms_accepted:$('agreeTerms').checked,
    session_id:submissionSessionId,customer_name:name,phone,
    score,accuracy:finalAccuracy,marketing_consent:$('consent').checked,
    terms_version:'draft-2026-11-07',
@@ -290,9 +285,10 @@ $('claim').onclick=async()=>{
    throw new Error(result.error||'تعذر تأكيد حفظ البيانات.');
   }
   $('couponCode').textContent=result.coupon_code||'';
+  $('couponPanel').classList.toggle('hidden',!result.coupon_code);
   $('claimForm').classList.add('hidden');
   $('confirmation').classList.remove('hidden');
-  track('reward_claim_saved',{score,reward_tier:result.reward_percent+'pct'});
+  track('lead_saved',{score,reward_tier:result.reward_percent+'pct'});
  }catch(e){
   $('claimError').textContent='لم يتم حفظ البيانات: '+(e&&e.message?e.message:'خطأ اتصال');
   $('claimError').classList.remove('hidden');
