@@ -172,7 +172,7 @@ bottlePreload.onerror=function(){bottleImageReady=false;};
 bottlePreload.src=imgUrl;
 
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v13',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v14',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
@@ -198,7 +198,26 @@ spawn+=dt;const period=difficulty[level-1].spawn;
 while(spawn>=period){spawn-=period;add()}
 const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt;o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*difficulty[level-1].sway));draw(o);if(o.y>h+8)remove(o)}
 }
-function start(){if(!$('agreeTerms').checked){$('termsError').classList.remove('hidden');$('agreeTerms').focus();return} $('termsError').classList.add('hidden');ensureAudio();track('start',{terms_accepted:true,terms_version:'draft-2026-11-07'});if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];round++;submissionSessionId=null;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);add();frameId=setInterval(function(){try{loop(performance.now())}catch(err){console.error('Mahasen game animation error',err);}},30)}
+let attemptToken=null,starting=false;
+async function start(){
+ if(starting)return;
+ if(!$('agreeTerms').checked){$('termsError').classList.remove('hidden');$('agreeTerms').focus();return}
+ $('termsError').classList.add('hidden');
+ starting=true;const startButton=$('start');
+ startButton.disabled=true;startButton.textContent='جارٍ تجهيز التحدي...';
+ try{
+  const response=await fetch('https://hdbicemwgnqkzfservan.supabase.co/functions/v1/mahasen-save-lead-test',
+   {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start'})});
+  const json=await response.json();
+  if(!response.ok||!json.attempt_token)throw new Error('لا يمكن بدء التحدي الآن. حاول مرة أخرى.');
+  attemptToken=json.attempt_token;
+ }catch(err){
+  $('termsError').textContent=err&&err.message?err.message:'تعذر الاتصال بالخادم.';
+  $('termsError').classList.remove('hidden');
+  starting=false;startButton.disabled=false;startButton.textContent='ابدأ التحدي';return;
+ }
+ starting=false;startButton.disabled=false;startButton.textContent='ابدأ التحدي';
+ ensureAudio();track('start',{terms_accepted:true,terms_version:'draft-2026-11-07'});if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];round++;submissionSessionId=null;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);add();frameId=setInterval(function(){try{loop(performance.now())}catch(err){console.error('Mahasen game animation error',err);}},30)}
 function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
 field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();track('shot',{level});let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*difficulty[level-1].hitbox&&Math.abs(y-cy)<o.height*difficulty[level-1].hitbox){hit=o;break}}if(hit){hitSound();hits++;track('hit',{level});const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
 let claimedReward=null;
@@ -233,6 +252,7 @@ $('termsModal').addEventListener('click',e=>{if(e.target===$('termsModal'))$('cl
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('termsModal').classList.contains('hidden'))$('closeTerms').click()});
 $('claim').onclick=async()=>{
  if(!claimedReward||!claimedReward.discount)return;
+ if(!attemptToken){$('claimError').textContent='جلسة اللعب غير صالحة، أعد اللعب.';$('claimError').classList.remove('hidden');return;}
  const name=$('customerName').value.trim();
  const phone=$('phone').value.replace(/[\s()-]/g,'');
  if(name.length<2||!/^(?:\+966|966|0)?5\d{8}$/.test(phone)){
@@ -255,7 +275,7 @@ $('claim').onclick=async()=>{
   }
   const params=new URLSearchParams(window.location.search);
   const payload={
-   test_mode:true,terms_accepted:$('agreeTerms').checked,
+   action:'claim',attempt_token:attemptToken,test_mode:true,terms_accepted:$('agreeTerms').checked,
    session_id:submissionSessionId,customer_name:name,phone,
    score,accuracy:finalAccuracy,marketing_consent:$('consent').checked,
    terms_version:'draft-2026-11-07',
