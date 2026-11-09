@@ -179,7 +179,7 @@ function finish(){
  finalAccuracy=accuracy;
  $('accuracy').textContent='دقة التصويب: '+accuracy+'%';
  claimedReward=rewardFor(score,accuracy);
- $('reward').textContent=claimedReward.discount?claimedReward.label+' — جائزتك خصم '+claimedReward.discount+'%':claimedReward.label+' — لم تحصل على جائزة';
+ $('reward').textContent=claimedReward.discount?claimedReward.label+' — فئة الخصم المبدئية '+claimedReward.discount+'%':claimedReward.label+' — لم تحصل على جائزة';
  $('claimForm').classList.remove('hidden');
  $('confirmation').classList.add('hidden');
  $('claimError').classList.add('hidden');
