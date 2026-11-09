@@ -85,15 +85,15 @@ html,body{overflow-x:hidden}
 <div class="layer" id="intro"><div class="panel"><h1>🎯 تحدي محاسن</h1><p>صوّب على عبوات محاسن واجمع النقاط لتحصل على خصومات حصرية على زيت محاسن الشعر!</p><p><strong>60 ثانية · 5 مستويات · جوائز حسب المهارة</strong></p><label class="terms-consent"><input type="checkbox" id="agreeTerms"> <span>أوافق على <button type="button" id="showTerms" class="text-link">شروط وأحكام المشاركة</button> و<a href="https://mahasen.com/pages/104757" target="_blank" rel="noopener" class="text-link">سياسة خصوصية المتجر</a>.</span></label><p id="termsError" class="form-error hidden" role="alert">يرجى الموافقة على الشروط قبل اللعب.</p><button class="primary" id="start">ابدأ التحدي</button></div></div>
 <div class="layer hidden" id="result"><div class="panel"><h1>🏆 انتهى التحدي!</h1><p>جمعت <strong id="finalScore">0</strong> نقطة</p><div id="reward" aria-live="polite"></div><p id="accuracy"></p>
 <div id="claimForm">
-  <p>سجّل بياناتك لاستلام الجائزة.</p>
+  <p>تجربة حفظ البيانات على Supabase: استخدم اسمًا وهميًا ورقم <strong dir="ltr">0500000000</strong> أو <strong dir="ltr">0500000001</strong>.</p>
   <input class="field" id="customerName" autocomplete="name" placeholder="الاسم" maxlength="70" required>
   <input class="field" id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="رقم الجوال السعودي" maxlength="16" required>
   <label class="note"><input type="checkbox" id="consent"> أرغب في استلام عروض محاسن مستقبلًا (اختياري)</label>
   <p id="claimError" class="form-error hidden" role="alert"></p>
-  <button class="primary" id="claim" type="button">استلام الجائزة</button>
+  <button class="primary" id="claim" type="button">اختبار حفظ البيانات واستلام الجائزة</button>
 </div>
 <div id="confirmation" class="hidden">
- <p>🎉 مبروك! هذا كود الخصم الخاص بفئة نقاطك:</p>
+ <p>🎉 تم حفظ البيانات التجريبية بنجاح! كود الخصم التوضيحي:</p>
  <div class="coupon-card"><strong id="couponCode" dir="ltr"></strong><button type="button" id="copyCoupon" class="secondary">نسخ كود الخصم</button></div>
  <p id="copyMessage" class="copy-message" aria-live="polite"></p>
 </div><button class="secondary" id="again">العب مرة تانية</button></div></div>
@@ -172,7 +172,7 @@ bottlePreload.onerror=function(){bottleImageReady=false;};
 bottlePreload.src=imgUrl;
 
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v12',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v13',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
@@ -198,10 +198,13 @@ spawn+=dt;const period=difficulty[level-1].spawn;
 while(spawn>=period){spawn-=period;add()}
 const {w,h}=dims();for(const o of [...objects]){o.y+=o.speed*dt;o.phase+=dt*(1+level*.4);o.x=Math.max(2,Math.min(w-o.width-2,o.x+Math.sin(o.phase+o.wave)*dt*difficulty[level-1].sway));draw(o);if(o.y>h+8)remove(o)}
 }
-function start(){if(!$('agreeTerms').checked){$('termsError').classList.remove('hidden');$('agreeTerms').focus();return} $('termsError').classList.add('hidden');ensureAudio();track('start',{terms_accepted:true,terms_version:'draft-2026-11-07'});if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];round++;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);add();frameId=setInterval(function(){try{loop(performance.now())}catch(err){console.error('Mahasen game animation error',err);}},30)}
+function start(){if(!$('agreeTerms').checked){$('termsError').classList.remove('hidden');$('agreeTerms').focus();return} $('termsError').classList.add('hidden');ensureAudio();track('start',{terms_accepted:true,terms_version:'draft-2026-11-07'});if(frameId)clearInterval(frameId);frameId=null;for(const o of objects)o.el.remove();objects=[];round++;submissionSessionId=null;running=true;score=0;hits=0;shots=0;level=1;spawn=0;started=performance.now();last=started;$('intro').classList.add('hidden');$('result').classList.add('hidden');$('claimForm').classList.remove('hidden');$('confirmation').classList.add('hidden');$('customerName').value='';$('phone').value='';$('consent').checked=false;update(0);add();frameId=setInterval(function(){try{loop(performance.now())}catch(err){console.error('Mahasen game animation error',err);}},30)}
 function pop(x,y,txt){const e=document.createElement('div');e.className='pop';e.textContent=txt;e.style.left=x+'px';e.style.top=y+'px';field.append(e);setTimeout(()=>e.remove(),520)}
 field.addEventListener('pointerdown',e=>{if(!running)return;e.preventDefault();const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;shots++;shotSound();track('shot',{level});let hit=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const cx=o.x+o.width/2,cy=o.y+o.height/2;if(Math.abs(x-cx)<o.width*difficulty[level-1].hitbox&&Math.abs(y-cy)<o.height*difficulty[level-1].hitbox){hit=o;break}}if(hit){hitSound();hits++;track('hit',{level});const pts=(level>=4?15:10);score+=pts;pop(x,y,'+'+pts);remove(hit)}else{score=Math.max(0,score-2);pop(x,y,'−2')}update((performance.now()-started)/1000)});
 let claimedReward=null;
+let finalAccuracy=0;
+let submissionSessionId=null;
+const leadEndpoint='https://hdbicemwgnqkzfservan.supabase.co/functions/v1/mahasen-save-lead-test';
 function rewardFor(scoreValue,accuracyValue){
  if(accuracyValue<45)return rewards[rewards.length-1];
  return rewards.find(r=>scoreValue>=r.min)||rewards[rewards.length-1];
@@ -211,6 +214,7 @@ function finish(){
  for(const o of objects)o.el.remove();objects=[];
  $('finalScore').textContent=score;
  const accuracy=shots?Math.round(100*hits/shots):0;
+ finalAccuracy=accuracy;
  $('accuracy').textContent='دقة التصويب: '+accuracy+'%';
  claimedReward=rewardFor(score,accuracy);
  $('reward').textContent=claimedReward.discount?claimedReward.label+' — جائزتك خصم '+claimedReward.discount+'%':claimedReward.label+' — لم تحصل على جائزة';
@@ -227,21 +231,54 @@ $('closeTerms').onclick=()=>{$('termsModal').classList.add('hidden');$('showTerm
 $('agreeTerms').onchange=()=>{if($('agreeTerms').checked)$('termsError').classList.add('hidden')};
 $('termsModal').addEventListener('click',e=>{if(e.target===$('termsModal'))$('closeTerms').click()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('termsModal').classList.contains('hidden'))$('closeTerms').click()});
-$('claim').onclick=()=>{
+$('claim').onclick=async()=>{
  if(!claimedReward||!claimedReward.discount)return;
  const name=$('customerName').value.trim();
  const phone=$('phone').value.replace(/[\s()-]/g,'');
- const saudiPhone=/^(?:\+966|966|0)?5\d{8}$/.test(phone);
- if(name.length<2||!saudiPhone){
-  $('claimError').textContent='يرجى إدخال الاسم ورقم جوال سعودي صحيح لاستلام الجائزة.';
-  $('claimError').classList.remove('hidden');
-  return;
+ if(name.length<2||!/^(?:\+966|966|0)?5\d{8}$/.test(phone)){
+  $('claimError').textContent='اكتب اسمًا وهميًا ورقم جوال سعودي تجريبي صحيح.';
+  $('claimError').classList.remove('hidden');return;
+ }
+ const normalized=phone.replace(/^(?:\+966|966|0)/,'');
+ if(!['500000000','500000001'].includes(normalized)){
+  $('claimError').textContent='الاختبار يقبل رقم 0500000000 أو 0500000001 فقط. لا تدخل رقمك الحقيقي.';
+  $('claimError').classList.remove('hidden');return;
  }
  $('claimError').classList.add('hidden');
- $('couponCode').textContent=claimedReward.code;
- $('claimForm').classList.add('hidden');
- $('confirmation').classList.remove('hidden');
- track('reward_claim_preview',{score,reward_tier:claimedReward.discount+'pct'});
+ const button=$('claim');button.disabled=true;button.textContent='جارٍ حفظ البيانات...';
+ try{
+  if(!submissionSessionId){
+   const cryptoAPI=window.crypto;
+   submissionSessionId=cryptoAPI&&typeof cryptoAPI.randomUUID==='function' ?
+     cryptoAPI.randomUUID() :
+     'test_'+Date.now()+'_'+Math.random().toString(36).slice(2,12);
+  }
+  const params=new URLSearchParams(window.location.search);
+  const payload={
+   test_mode:true,terms_accepted:$('agreeTerms').checked,
+   session_id:submissionSessionId,customer_name:name,phone,
+   score,accuracy:finalAccuracy,marketing_consent:$('consent').checked,
+   terms_version:'draft-2026-11-07',
+   utm_source:params.get('utm_source')||'',
+   utm_medium:params.get('utm_medium')||'',
+   utm_campaign:params.get('utm_campaign')||'',
+   page_url:window.location.href
+  };
+  const resp=await fetch(leadEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const result=await resp.json();
+  if(!resp.ok||!result.saved||!result.id){
+   throw new Error(result.error||'تعذر تأكيد حفظ البيانات.');
+  }
+  $('couponCode').textContent=result.coupon_code||'';
+  $('claimForm').classList.add('hidden');
+  $('confirmation').classList.remove('hidden');
+  track('reward_claim_saved',{score,reward_tier:result.reward_percent+'pct'});
+ }catch(e){
+  $('claimError').textContent='لم يتم حفظ البيانات: '+(e&&e.message?e.message:'خطأ اتصال');
+  $('claimError').classList.remove('hidden');
+ }finally{
+  button.disabled=false;button.textContent='اختبار حفظ البيانات واستلام الجائزة';
+ }
 };
 $('copyCoupon').onclick=()=>{
  const coupon=$('couponCode').textContent;
