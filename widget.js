@@ -74,7 +74,7 @@ function addButton(){
    '}',
    '#mahasen-widget-launch::after{opacity:0;}',
    '}'
-  ].join('\\n');
+  ].join('');
   (document.head||document.body).appendChild(pulseStyle);
  }
  var b=document.createElement('button');
