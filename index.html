@@ -93,7 +93,7 @@ html,body{overflow-x:hidden}
   <button class="primary" id="claim" type="button">تسجيل البيانات</button>
 </div>
 <div id="confirmation" class="hidden">
- <p>✅ تم تسجيل بياناتك بنجاح. سيتم إعلان تفاصيل استلام الجوائز بعد اعتماد الحملة.</p>
+ <p>✅ تم تسجيل بياناتك بنجاح. الكود الموضح أدناه مبدئي، ويحتاج تفعيلًا من متجر محاسن قبل استخدامه في الطلبات.</p>
  <div class="coupon-card hidden" id="couponPanel"><strong id="couponCode" dir="ltr"></strong><button type="button" id="copyCoupon" class="secondary">نسخ كود الخصم</button></div>
  <p id="copyMessage" class="copy-message" aria-live="polite"></p>
 </div><button class="secondary" id="again">العب مرة تانية</button></div></div>
@@ -172,7 +172,7 @@ bottlePreload.onerror=function(){bottleImageReady=false;};
 bottlePreload.src=imgUrl;
 
 function track(name,extra={}){
- const payload={event:'mahasen_'+name,game_version:'v16',...extra};
+ const payload={event:'mahasen_'+name,game_version:'v18',...extra};
  try{if(window.parent!==window)window.parent.postMessage({type:'mahasen_game_event',payload},'*')}catch(e){}
  try{if(window.parent===window&&Array.isArray(window.dataLayer))window.dataLayer.push(payload)}catch(e){}
 }
@@ -256,7 +256,7 @@ $('claim').onclick=async()=>{
  const name=$('customerName').value.trim();
  const phone=$('phone').value.replace(/[\s()-]/g,'');
  if(name.length<2||!/^(?:\+966|966|0)?5\d{8}$/.test(phone)){
-  $('claimError').textContent='اكتب اسمًا وهميًا ورقم جوال سعودي تجريبي صحيح.';
+  $('claimError').textContent='اكتب اسمًا صحيحًا ورقم جوال سعودي صحيحًا.';
   $('claimError').classList.remove('hidden');return;
  }
  $('claimError').classList.add('hidden');
@@ -293,7 +293,7 @@ $('claim').onclick=async()=>{
   $('claimError').textContent='لم يتم حفظ البيانات: '+(e&&e.message?e.message:'خطأ اتصال');
   $('claimError').classList.remove('hidden');
  }finally{
-  button.disabled=false;button.textContent='اختبار حفظ البيانات واستلام الجائزة';
+  button.disabled=false;button.textContent='تسجيل البيانات';
  }
 };
 $('copyCoupon').onclick=()=>{
